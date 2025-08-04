@@ -24,3 +24,48 @@ class Info(UserPermission):
                 "token": request.user.auth_token.key,
             }
         )
+    
+class SignUp(APIView):
+    def post(self, request):
+        data = request.data.copy()
+        data['username'] = data.get('email')
+        data['is_staff'] = False
+        data['is_superuser'] = False
+        new_user = User(**data)
+
+        try:
+            new_user.full_clean()
+            user = User.objects.create_user(
+
+                **data
+            )
+            token_obj = Token.objects.create(user=user)
+            return Response({'token':token_obj.key}, status=s.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(e, status=s.HTTP_400_BAD_REQUEST)
+        
+class LogIn(APIView):
+    
+    def post(self, request):
+        data = data.request.copy()
+
+        user =authenticate(
+            username=data.get('username'), password=data.get('password')
+        )
+        if user:
+            token_obj, _ = Token.objects.get_or_create(user=user)
+            login(request=request, user=user)
+            return Response({'token': token_obj.key}, status=s.HTTP_200_OK)
+        else:
+            return Response(
+                'No user matching these credentials', status=s.HTTP_404_NOT_FOUND
+            )
+
+class LogOut(UserPermission):
+
+    def post(self, request):
+        user = request.user
+        token = user.auth_token
+        logout(request)
+        token.delete()
+        return Response({'success':True})
