@@ -42,23 +42,30 @@ class SignUp(APIView):
             token_obj = Token.objects.create(user=user)
             return Response({'token':token_obj.key}, status=s.HTTP_201_CREATED)
         except Exception as e:
-            return Response(e, status=s.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)}, status=s.HTTP_400_BAD_REQUEST)
         
 class LogIn(APIView):
     
     def post(self, request):
-        data = data.request.copy()
+        data = request.data.copy()
 
-        user =authenticate(
-            username=data.get('username'), password=data.get('password')
-        )
+        username = data.get('username')
+        password = data.get('password')
+        if not username or not password:
+            return Response(
+                {'detail': 'Username and password required'},
+                status=s.HTTP_400_BAD_REQUEST,
+            )
+
+        user = authenticate(username=username, password=password)
         if user:
             token_obj, _ = Token.objects.get_or_create(user=user)
             login(request=request, user=user)
             return Response({'token': token_obj.key}, status=s.HTTP_200_OK)
         else:
             return Response(
-                'No user matching these credentials', status=s.HTTP_404_NOT_FOUND
+                {'detail': 'Invalid credentials'},
+                status=s.HTTP_401_UNAUTHORIZED,
             )
 
 class LogOut(UserPermission):
@@ -68,4 +75,4 @@ class LogOut(UserPermission):
         token = user.auth_token
         logout(request)
         token.delete()
-        return Response({'success':True})
+        return Response({'success': True})
