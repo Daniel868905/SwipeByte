@@ -1,3 +1,29 @@
 from django.test import TestCase
+from rest_framework.test import APITestCase
 
-# Create your tests here.
+
+class AuthenticationFlowTests(APITestCase):
+    """Ensure users can sign up and then log in."""
+
+    def test_signup_and_login(self):
+        signup_data = {
+            "email": "alice@example.com",
+            "password": "testpass123",
+        }
+        signup_response = self.client.post("/api/v1/users/signup/", signup_data)
+        self.assertEqual(signup_response.status_code, 201)
+        self.assertIn("token", signup_response.data)
+
+        login_response = self.client.post(
+            "/api/v1/users/login/", signup_data
+        )
+        self.assertEqual(login_response.status_code, 200)
+        self.assertIn("token", login_response.data)
+
+
+    def test_login_invalid_credentials(self):
+        login_response = self.client.post(
+            "/api/v1/users/login/",
+            {"email": "nouser@example.com", "password": "wrong"},
+        )
+        self.assertEqual(login_response.status_code, 401)

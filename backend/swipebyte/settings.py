@@ -85,8 +85,8 @@ WSGI_APPLICATION = 'swipebyte.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':'swipebyte_db',
+        'ENGINE':os.environ.get('DB_ENGINE'),
+        'NAME':os.environ.get('DB_NAME'),
     }
 }
 

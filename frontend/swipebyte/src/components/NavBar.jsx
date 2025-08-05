@@ -1,6 +1,12 @@
 import React from 'react'
 
-function NavBar({ isLoggedIn, onNavigate, onLogout }) {
+function NavBar({
+  isLoggedIn,
+  onNavigate,
+  onLogout,
+  darkMode,
+  onToggleTheme,
+}) {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">

@@ -54,7 +54,13 @@ function App() {
 
   return (
     <>
-    <NavBar isLoggedIn={!!token} onNavigate={setView} onLogout={handleLogout} />
+      <NavBar
+        isLoggedIn={!!token}
+        onNavigate={setView}
+        onLogout={handleLogout}
+        darkMode={darkMode}
+        onToggleTheme={toggleTheme}
+      />
       {page}
     </>
   )

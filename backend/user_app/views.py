@@ -27,22 +27,39 @@ class Info(UserPermission):
     
 class SignUp(APIView):
     def post(self, request):
-        data = request.data.copy()
-        data['username'] = data.get('email')
-        data['is_staff'] = False
-        data['is_superuser'] = False
-        new_user = User(**data)
+        """Create a new user and return an auth token.
 
-        try:
-            new_user.full_clean()
-            user = User.objects.create_user(
+        Only the ``email`` and ``password`` fields are required.  Any extra
+        fields supplied by the client are ignored so that front‑end payloads
+        containing values such as ``confirmPassword`` do not cause the request
+        to fail with a ``400`` response.
+        """
 
-                **data
+        email = request.data.get("email")
+        password = request.data.get("password")
+        first_name = request.data.get("first_name", "")
+        last_name = request.data.get("last_name", "")
+
+        if not email or not password:
+            return Response(
+                {"detail": "Email and password required"},
+                status=s.HTTP_400_BAD_REQUEST,
             )
-            token_obj = Token.objects.create(user=user)
-            return Response({'token':token_obj.key}, status=s.HTTP_201_CREATED)
+        try:
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                is_staff=False,
+                is_superuser=False,
+            )
         except Exception as e:
-            return Response({'error': str(e)}, status=s.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
+
+        token_obj, _ = Token.objects.get_or_create(user=user)
+        return Response({"token": token_obj.key}, status=s.HTTP_201_CREATED)
         
 class LogIn(APIView):
     
