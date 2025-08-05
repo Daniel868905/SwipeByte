@@ -7,6 +7,7 @@ function Signup({ onAuth, backendUrl }) {
     first_name: '',
     last_name: '',
   })
+  const [error, setError] = useState(null)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -14,24 +15,30 @@ function Signup({ onAuth, backendUrl }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError(null)
     try {
       const res = await fetch(`${backendUrl}/signup/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
+      const data = await res.json()
       if (res.ok) {
-        const data = await res.json()
         onAuth(data.token)
+              } else {
+        setError(data.error || data.detail || 'Signup failed')
       }
     } catch (err) {
       console.error(err)
+      setError('An error occurred. Please try again.')
+
     }
   }
 
   return (
     <div className="container mt-4">
       <h2>Create Account</h2>
+      {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label className="form-label">Email</label>
@@ -46,7 +53,7 @@ function Signup({ onAuth, backendUrl }) {
         </div>
         <div className="mb-3">
           <label className="form-label">Password</label>
-                    <input
+            <input
             type="password"
             className="form-control"
             name="password"

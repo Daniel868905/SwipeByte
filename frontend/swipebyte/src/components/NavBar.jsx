@@ -1,16 +1,21 @@
 import React from 'react'
 
-function NavBar({
-  isLoggedIn,
-  onNavigate,
-  onLogout,
-  darkMode,
-  onToggleTheme,
-}) {
+function NavBar({ isLoggedIn, onNavigate, onLogout, darkMode, onToggleTheme }) {
+  const navbarTheme = darkMode
+    ? 'navbar-dark bg-dark'
+    : 'navbar-light bg-light'
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className={`navbar navbar-expand-lg ${navbarTheme}`}>
       <div className="container-fluid">
-        <a className="navbar-brand" href="#" onClick={() => onNavigate('home')}>
+                <a
+          className="navbar-brand"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault()
+            onNavigate('home')
+          }}
+        >
           SwipeByte
         </a>
         <div className="collapse navbar-collapse">
@@ -18,12 +23,26 @@ function NavBar({
             {!isLoggedIn && (
               <>
                 <li className="nav-item">
-                  <a className="nav-link" href="#" onClick={() => onNavigate('signup')}>
+                                  <a
+                  className="nav-link"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    onNavigate('signup')
+                  }}
+                >
                     Create Account
                   </a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="#" onClick={() => onNavigate('login')}>
+                  <a
+                    className="nav-link"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      onNavigate('login')
+                    }}
+                  >
                     Login
                   </a>
                 </li>
@@ -31,7 +50,14 @@ function NavBar({
             )}
             {isLoggedIn && (
               <li className="nav-item">
-                <a className="nav-link" href="#" onClick={onLogout}>
+                                <a
+                  className="nav-link"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    onLogout()
+                  }}
+                >
                   Logout
                 </a>
               </li>

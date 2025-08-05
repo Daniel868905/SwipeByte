@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'user_app',
     'group_app',
     'favorite_app',
+    'restaurant_app',
     
 ]
 

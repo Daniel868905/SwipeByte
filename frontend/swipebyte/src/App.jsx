@@ -8,7 +8,7 @@ import './App.css'
 const API_BASE ='http://localhost:8000/api/v1/users'
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token'))
+  const [token, setToken] = useState(() => localStorage.getItem('token'))
   const [view, setView] = useState('home')
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem('theme') === 'dark'
@@ -21,8 +21,16 @@ function App() {
 
   const toggleTheme = () => setDarkMode((prev) => !prev)
 
+    useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token)
+    } else {
+      localStorage.removeItem('token')
+    }
+  }, [token])
+
+
   const handleAuth = (newToken) => {
-    localStorage.setItem('token', newToken)
     setToken(newToken)
     setView('home')
   }
@@ -37,7 +45,6 @@ function App() {
     } catch (e) {
       console.error(e)
     }
-    localStorage.removeItem('token')
     setToken(null)
     setView('home')
   }
@@ -48,7 +55,7 @@ function App() {
   } else if (view === 'login') {
     page = <Login onAuth={handleAuth} backendUrl={API_BASE} />
   } else {
-    page = <Home isLoggedIn={!!token} />
+    page = <Home isLoggedIn={!!token} token={token} />
   }
 
 
