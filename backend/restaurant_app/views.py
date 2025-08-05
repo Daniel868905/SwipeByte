@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from rest_framework.views import APIView
@@ -16,30 +17,47 @@ class RestaurantSearchView(APIView):
         distance = request.query_params.get('distance', '1600')
         price = request.query_params.get('price')
 
-        headers = {
-            'Authorization': f"Bearer {os.environ.get('YELP_API_KEY', '')}"
-        }
+        api_key = os.environ.get('GOOGLE_API_KEY', '')
+
+
         params = {
-            'latitude': latitude,
-            'longitude': longitude,
+            'location': f"{latitude},{longitude}",
             'radius': distance,
-            'term': 'restaurants'
+            'type': 'restaurant',
+            'key': api_key,
         }
         if price:
-            params['price'] = price
+            params['minprice'] = price
+            params['maxprice'] = price
 
-        url = 'https://api.yelp.com/v3/businesses/search?' + urlencode(params)
-        req = Request(url, headers=headers)
-        resp = urlopen(req)
-        data = json.loads(resp.read())
+        resp = requests.get(
+            'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
+            params=params,
+        )
+        data = resp.json()
+
         restaurants = []
-        for biz in data.get('businesses', []):
+        for result in data.get('results', []):
+            photo_reference = None
+            photos = result.get('photos')
+            if photos:
+                photo_reference = photos[0].get('photo_reference')
+
+            image_url = None
+            if photo_reference:
+                image_url = (
+                    'https://maps.googleapis.com/maps/api/place/photo'
+                    f'?maxwidth=400&photoreference={photo_reference}&key={api_key}'
+                )
             restaurants.append({
-                'id': biz.get('id'),
-                'name': biz.get('name'),
-                'image_url': biz.get('image_url'),
-                'rating': biz.get('rating'),
-                'price': biz.get('price'),
-                'url': biz.get('url'),
+                'id': result.get('place_id'),
+                'name': result.get('name'),
+                'image_url': image_url,
+                'rating': result.get('rating'),
+                'price': result.get('price_level'),
+                'url': (
+                    'https://www.google.com/maps/place/?q=place_id:'
+                    f"{result.get('place_id')}"
+                ),
             })
         return Response(restaurants)
