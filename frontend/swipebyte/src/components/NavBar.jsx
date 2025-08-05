@@ -30,6 +30,21 @@ function NavBar({ isLoggedIn, onNavigate, onLogout }) {
                 </a>
               </li>
             )}
+            <li className="nav-item d-flex align-items-center ms-3">
+              <div className="form-check form-switch m-0">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="themeSwitch"
+                  checked={darkMode}
+                  onChange={onToggleTheme}
+                />
+                <label className="form-check-label ms-2" htmlFor="themeSwitch">
+                  {darkMode ? 'Dark' : 'Light'}
+                </label>
+              </div>
+            </li>
           </ul>
         </div>
       </div>

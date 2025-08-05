@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 function Login({ onAuth, backendUrl }) {
-  const [form, setForm] = useState({ username: '', password: '' })
+    const [form, setForm] = useState({ email: '', password: '' })
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -31,10 +31,10 @@ function Login({ onAuth, backendUrl }) {
         <div className="mb-3">
           <label className="form-label">Email</label>
           <input
-            type="text"
+            type="email"
             className="form-control"
-            name="username"
-            value={form.username}
+            name="email"
+            value={form.email}
             onChange={handleChange}
             required
           />

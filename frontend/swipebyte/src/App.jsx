@@ -10,6 +10,16 @@ const API_BASE ='http://localhost:8000/api/v1/users'
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'))
   const [view, setView] = useState('home')
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem('theme') === 'dark'
+  )
+
+  useEffect(() => {
+    document.body.dataset.bsTheme = darkMode ? 'dark' : 'light'
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light')
+  }, [darkMode])
+
+  const toggleTheme = () => setDarkMode((prev) => !prev)
 
   const handleAuth = (newToken) => {
     localStorage.setItem('token', newToken)

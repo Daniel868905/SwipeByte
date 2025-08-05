@@ -49,15 +49,15 @@ class LogIn(APIView):
     def post(self, request):
         data = request.data.copy()
 
-        username = data.get('username')
+        email = data.get('email') or data.get('username')
         password = data.get('password')
-        if not username or not password:
+        if not email or not password:
             return Response(
-                {'detail': 'Username and password required'},
+                {'detail': 'Email and password required'},
                 status=s.HTTP_400_BAD_REQUEST,
             )
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=email, password=password)
         if user:
             token_obj, _ = Token.objects.get_or_create(user=user)
             login(request=request, user=user)
