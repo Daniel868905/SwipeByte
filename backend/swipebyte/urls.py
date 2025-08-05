@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import ping
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+     path('api/v1/ping/', ping),
     path('api/v1/users/', include('user_app.urls')),
     path('api/v1/groups/', include('group_app.urls')),
     path('api/v1/favorites', include('favorite_app.urls')),

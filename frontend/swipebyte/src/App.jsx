@@ -1,33 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
+import NavBar from './components/NavBar'
+import Home from './pages/Home'
+import Signup from './pages/Signup'
+import Login from './pages/Login'
 import './App.css'
 
+const API_BASE ='http://localhost:8000/api/v1/users'
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [token, setToken] = useState(localStorage.getItem('token'))
+  const [view, setView] = useState('home')
+
+  const handleAuth = (newToken) => {
+    localStorage.setItem('token', newToken)
+    setToken(newToken)
+    setView('home')
+  }
+
+  const handleLogout = async () => {
+    if (!token) return
+    try {
+      await fetch(`${API_BASE}/logout/`, {
+        method: 'POST',
+        headers: { Authorization: `Token ${token}` },
+      })
+    } catch (e) {
+      console.error(e)
+    }
+    localStorage.removeItem('token')
+    setToken(null)
+    setView('home')
+  }
+
+  let page
+  if (view === 'signup') {
+    page = <Signup onAuth={handleAuth} backendUrl={API_BASE} />
+  } else if (view === 'login') {
+    page = <Login onAuth={handleAuth} backendUrl={API_BASE} />
+  } else {
+    page = <Home isLoggedIn={!!token} />
+  }
+
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <NavBar isLoggedIn={!!token} onNavigate={setView} onLogout={handleLogout} />
+      {page}
     </>
   )
 }
