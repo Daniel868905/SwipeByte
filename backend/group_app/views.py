@@ -12,6 +12,6 @@ class GroupWithFavoritesView(APIView):
 
     def get(self, request):
         user = request.user
-        groups = Group.objects.filter(members=user)
+        groups = Group.objects.filter(members__in=[user])
         serializer = GroupDetailSerializer(groups, many=True)
         return Response(serializer.data)

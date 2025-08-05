@@ -6,5 +6,5 @@ from user_app.models import User
 
 class Group(models.Model):
     group_name = models.CharField(max_length=255, blank=True)
-    members = models.ForeignKey(User, on_delete=models.CASCADE, related_name='group')
+    members = models.ManyToManyField(User, related_name='group')
     

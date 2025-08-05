@@ -4,7 +4,7 @@ from favorite_app.serializers import FavoriteSerializer
 from user_app.serializers import UserSerializer  # from before
 
 class GroupDetailSerializer(serializers.ModelSerializer):
-    members = UserSerializer(read_only=True)
+    members = UserSerializer(many=True, read_only=True)
     favorites = FavoriteSerializer(many=True, read_only=True)
 
     class Meta:

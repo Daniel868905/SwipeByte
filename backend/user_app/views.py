@@ -7,6 +7,7 @@ from rest_framework import status as s
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.db import IntegrityError
 # Create your views here.
    
 class UserPermission(APIView):  
@@ -55,6 +56,11 @@ class SignUp(APIView):
                 is_staff=False,
                 is_superuser=False,
             )
+        except IntegrityError:
+            return Response(
+                {"error": "User with this email already exists"},
+                status=s.HTTP_400_BAD_REQUEST,
+            )
         except Exception as e:
             return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
 
@@ -92,4 +98,4 @@ class LogOut(UserPermission):
         token = user.auth_token
         logout(request)
         token.delete()
-        return Response({'success': True})
+        return Response({"success": True})

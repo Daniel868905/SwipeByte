@@ -27,3 +27,11 @@ class AuthenticationFlowTests(APITestCase):
             {"email": "nouser@example.com", "password": "wrong"},
         )
         self.assertEqual(login_response.status_code, 401)
+
+    def test_signup_duplicate_email(self):
+        data = {"email": "bob@example.com", "password": "pass123"}
+        first = self.client.post("/api/v1/users/signup/", data)
+        self.assertEqual(first.status_code, 201)
+        second = self.client.post("/api/v1/users/signup/", data)
+        self.assertEqual(second.status_code, 400)
+        self.assertIn("error", second.data)
