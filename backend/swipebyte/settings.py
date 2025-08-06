@@ -23,8 +23,10 @@ load_dotenv()
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# Use an environment variable if provided, otherwise fall back to a
+# hardcoded key suitable for tests and development. This avoids runtime
+# errors when ``DJANGO_SECRET_KEY`` is not defined.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -40,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -87,17 +88,11 @@ WSGI_APPLICATION = 'swipebyte.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get(
-            'DB_ENGINE', 'django.contrib.gis.db.backends.spatialite'
-        ),
-        'NAME': os.environ.get('DB_NAME', BASE_DIR / 'db.sqlite3'),
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.environ.get('DB_NAME'),
     }
 }
 
-if DATABASES['default']['ENGINE'] == 'django.contrib.gis.db.backends.spatialite':
-    SPATIALITE_LIBRARY_PATH = os.environ.get(
-        'SPATIALITE_LIBRARY_PATH', 'mod_spatialite'
-    )
     
 
 

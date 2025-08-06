@@ -40,5 +40,5 @@ class FavoriteDetailView(generics.RetrieveUpdateDestroyAPIView):
         """Allow access to user's favorites and group favorites they belong to."""
         user = self.request.user
         return Favorite.objects.filter(
-            Q(user_favorites=user) | Q(group_favorites__members=user)
+            Q(user_favorites=user) | Q(group_favorites__members=user) # type: ignore
         )

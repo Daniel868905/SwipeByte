@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
 
 function Login({ onAuth, backendUrl }) {
-    const [form, setForm] = useState({ email: '', password: '' })
-
+   const [form, setForm] = useState({ email: '', password: '' })
+  const [token, setToken] = useState(null)
+  const [address, setAddress] = useState('')
+  const [needsLocation, setNeedsLocation] = useState(false)
+  const googleApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
@@ -17,7 +20,52 @@ function Login({ onAuth, backendUrl }) {
       })
       if (res.ok) {
         const data = await res.json()
-        onAuth(data.token)
+               navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            await fetch(`${backendUrl}/location/`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Token ${data.token}`,
+              },
+              body: JSON.stringify({
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+              }),
+            })
+            onAuth(data.token)
+          },
+          () => {
+            setToken(data.token)
+            setNeedsLocation(true)
+          }
+        )
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleAddressSubmit = async () => {
+    if (!address) return
+    try {
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          address
+        )}&key=${googleApiKey}`
+      )
+      const geo = await res.json()
+      const loc = geo.results[0]?.geometry?.location
+      if (loc) {
+        await fetch(`${backendUrl}/location/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ latitude: loc.lat, longitude: loc.lng }),
+        })
+        onAuth(token)
       }
     } catch (err) {
       console.error(err)
@@ -54,6 +102,25 @@ function Login({ onAuth, backendUrl }) {
           Login
         </button>
       </form>
+            {needsLocation && (
+        <div className="mt-3">
+          <label className="form-label">Enter your location</label>
+          <input
+            type="text"
+            className="form-control"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Address"
+          />
+          <button
+            type="button"
+            className="btn btn-secondary mt-2"
+            onClick={handleAddressSubmit}
+          >
+            Use Address
+          </button>
+        </div>
+      )}
     </div>
   )
 }

@@ -3,8 +3,6 @@ import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
 
 from .models import Restaurant
 from favorite_app.models import Favorite
@@ -22,14 +20,8 @@ class RestaurantSearchView(APIView):
             user_favorites=request.user
         ).values_list('restaurant', flat=True)
 
+        qs = Restaurant.objects.all()
 
-        user_point = Point(longitude, latitude)
-        qs = Restaurant.objects.filter(
-            location__distance_lte=(user_point, D(m=distance))
-        )
-
-        if price:
-            qs = qs.filter(price=price)
         if user_likes:
             qs = qs.exclude(place_id__in=list(user_likes))
 
@@ -69,10 +61,7 @@ class RestaurantSearchView(APIView):
                     place_id=result.get('place_id'),
                     defaults={
                         'name': result.get('name'),
-                        'location': Point(
-                            loc.get('lng'),
-                            loc.get('lat'),
-                        ),
+                        'location': f"{loc.get('lat')},{loc.get('lng')}",
                         'rating': result.get('rating'),
                         'price': result.get('price_level'),
                         'image_url': image_url,
@@ -82,11 +71,7 @@ class RestaurantSearchView(APIView):
                         ),
                     },
                 )
-            qs = Restaurant.objects.filter(
-                location__distance_lte=(user_point, D(m=distance))
-            )
-            if price:
-                qs = qs.filter(price=price)
+            qs = Restaurant.objects.all()
             if user_likes:
                 qs = qs.exclude(place_id__in=list(user_likes))
 

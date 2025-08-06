@@ -3,6 +3,7 @@ import NavBar from './components/NavBar'
 import Home from './pages/Home'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
+import Group from './pages/Group'
 import './App.css'
 
 const API_BASE ='http://localhost:8000/api/v1/users'
@@ -54,6 +55,8 @@ function App() {
     page = <Signup onAuth={handleAuth} backendUrl={API_BASE} />
   } else if (view === 'login') {
     page = <Login onAuth={handleAuth} backendUrl={API_BASE} />
+  } else if (view === 'group') {
+    page = <Group token={token} />
   } else {
     page = <Home isLoggedIn={!!token} token={token} />
   }

@@ -20,17 +20,29 @@ function NavBar({ isLoggedIn, onNavigate, onLogout, darkMode, onToggleTheme }) {
         </a>
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li className="nav-item">
+              <a
+                className="nav-link"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onNavigate('home')
+                }}
+              >
+                Home
+              </a>
+            </li>
             {!isLoggedIn && (
               <>
                 <li className="nav-item">
-                                  <a
-                  className="nav-link"
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate('signup')
-                  }}
-                >
+                  <a
+                    className="nav-link"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      onNavigate('signup')
+                    }}
+                  >
                     Create Account
                   </a>
                 </li>
@@ -49,18 +61,32 @@ function NavBar({ isLoggedIn, onNavigate, onLogout, darkMode, onToggleTheme }) {
               </>
             )}
             {isLoggedIn && (
-              <li className="nav-item">
-                                <a
-                  className="nav-link"
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onLogout()
-                  }}
-                >
-                  Logout
-                </a>
-              </li>
+              <>
+                <li className="nav-item">
+                  <a
+                    className="nav-link"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      onNavigate('group')
+                    }}
+                  >
+                    Create Group
+                  </a>
+                </li>
+                <li className="nav-item">
+                  <a
+                    className="nav-link"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      onLogout()
+                    }}
+                  >
+                    Logout
+                  </a>
+                </li>
+              </>
             )}
             <li className="nav-item d-flex align-items-center ms-3">
               <div className="form-check form-switch m-0">
