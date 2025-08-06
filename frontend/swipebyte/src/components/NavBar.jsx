@@ -68,6 +68,18 @@ function NavBar({ isLoggedIn, onNavigate, onLogout, darkMode, onToggleTheme }) {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault()
+                      onNavigate('groups')
+                    }}
+                  >
+                    Groups
+                  </a>
+                </li>
+                <li className="nav-item">
+                  <a
+                    className="nav-link"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
                       onNavigate('group')
                     }}
                   >

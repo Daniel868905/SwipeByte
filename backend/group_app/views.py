@@ -79,3 +79,45 @@ class GroupSwipeView(APIView):
             matched = True
 
         return Response({'matched': matched})
+    
+class GroupMembersView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, group_id):
+        group = get_object_or_404(Group, id=group_id)
+        if request.user not in group.members.all():
+            return Response(
+                {"error": "Not a member of this group"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        member_emails = request.data.get("members", [])
+        if not isinstance(member_emails, list):
+            member_emails = [member_emails]
+
+        users = User.objects.filter(email__in=member_emails)
+        if users:
+            group.members.add(*users)
+
+        serializer = GroupDetailSerializer(group)
+        return Response(serializer.data)
+
+    def delete(self, request, group_id):
+        group = get_object_or_404(Group, id=group_id)
+        if request.user not in group.members.all():
+            return Response(
+                {"error": "Not a member of this group"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        member_emails = request.data.get("members", [])
+        if not isinstance(member_emails, list):
+            member_emails = [member_emails]
+
+        users = User.objects.filter(email__in=member_emails)
+        if users:
+            group.members.remove(*users)
+
+        serializer = GroupDetailSerializer(group)
+        return Response(serializer.data)
