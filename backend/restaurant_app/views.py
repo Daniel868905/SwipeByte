@@ -1,63 +1,104 @@
 import os
-import json
 import requests
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import D
 
+from .models import Restaurant
+from favorite_app.models import Favorite
 
 class RestaurantSearchView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        latitude = request.query_params.get('lat', '40.7128')
-        longitude = request.query_params.get('lon', '-74.0060')
-        distance = request.query_params.get('distance', '1600')
+        latitude = float(request.query_params.get('lat', '40.7128'))
+        longitude = float(request.query_params.get('lon', '-74.0060'))
+        distance = float(request.query_params.get('distance', '1600'))
         price = request.query_params.get('price')
 
-        api_key = os.environ.get('GOOGLE_API_KEY', '')
+        user_likes = Favorite.objects.filter(
+            user_favorites=request.user
+        ).values_list('restaurant', flat=True)
 
 
-        params = {
-            'location': f"{latitude},{longitude}",
-            'radius': distance,
-            'type': 'restaurant',
-            'key': api_key,
-        }
-        if price:
-            params['minprice'] = price
-            params['maxprice'] = price
-
-        resp = requests.get(
-            'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
-            params=params,
+        user_point = Point(longitude, latitude)
+        qs = Restaurant.objects.filter(
+            location__distance_lte=(user_point, D(m=distance))
         )
-        data = resp.json()
 
-        restaurants = []
-        for result in data.get('results', []):
-            photo_reference = None
-            photos = result.get('photos')
-            if photos:
-                photo_reference = photos[0].get('photo_reference')
+        if price:
+            qs = qs.filter(price=price)
+        if user_likes:
+            qs = qs.exclude(place_id__in=list(user_likes))
 
-            image_url = None
-            if photo_reference:
-                image_url = (
-                    'https://maps.googleapis.com/maps/api/place/photo'
-                    f'?maxwidth=400&photoreference={photo_reference}&key={api_key}'
+        if not qs.exists():
+            api_key = os.environ.get('GOOGLE_API_KEY', '')
+            params = {
+                'location': f"{latitude},{longitude}",
+                'radius': distance,
+                'type': 'restaurant',
+                'key': api_key,
+            }
+            if price:
+                params['minprice'] = price
+                params['maxprice'] = price
+
+            resp = requests.get(
+                'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
+                params=params,
+            )
+            data = resp.json()
+
+            for result in data.get('results', []):
+                photo_reference = None
+                photos = result.get('photos')
+                if photos:
+                    photo_reference = photos[0].get('photo_reference')
+
+                image_url = None
+                if photo_reference:
+                    image_url = (
+                        'https://maps.googleapis.com/maps/api/place/photo'
+                        f'?maxwidth=400&photoreference={photo_reference}&key={api_key}'
+                    )
+
+                loc = result.get('geometry', {}).get('location', {})
+                Restaurant.objects.get_or_create(
+                    place_id=result.get('place_id'),
+                    defaults={
+                        'name': result.get('name'),
+                        'location': Point(
+                            loc.get('lng'),
+                            loc.get('lat'),
+                        ),
+                        'rating': result.get('rating'),
+                        'price': result.get('price_level'),
+                        'image_url': image_url,
+                        'url': (
+                            'https://www.google.com/maps/place/?q=place_id:'
+                            f"{result.get('place_id')}"
+                        ),
+                    },
                 )
-            restaurants.append({
-                'id': result.get('place_id'),
-                'name': result.get('name'),
-                'image_url': image_url,
-                'rating': result.get('rating'),
-                'price': result.get('price_level'),
-                'url': (
-                    'https://www.google.com/maps/place/?q=place_id:'
-                    f"{result.get('place_id')}"
-                ),
-            })
+            qs = Restaurant.objects.filter(
+                location__distance_lte=(user_point, D(m=distance))
+            )
+            if price:
+                qs = qs.filter(price=price)
+            if user_likes:
+                qs = qs.exclude(place_id__in=list(user_likes))
+
+        restaurants = [
+            {
+                'id': r.place_id,
+                'name': r.name,
+                'image_url': r.image_url,
+                'rating': r.rating,
+                'price': r.price,
+                'url': r.url,
+            }
+            for r in qs
+        ]
         return Response(restaurants)

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -86,10 +87,19 @@ WSGI_APPLICATION = 'swipebyte.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE':os.environ.get('DB_ENGINE'),
-        'NAME':os.environ.get('DB_NAME'),
+        'ENGINE': os.environ.get(
+            'DB_ENGINE', 'django.contrib.gis.db.backends.spatialite'
+        ),
+        'NAME': os.environ.get('DB_NAME', BASE_DIR / 'db.sqlite3'),
     }
 }
+
+if DATABASES['default']['ENGINE'] == 'django.contrib.gis.db.backends.spatialite':
+    SPATIALITE_LIBRARY_PATH = os.environ.get(
+        'SPATIALITE_LIBRARY_PATH', 'mod_spatialite'
+    )
+    
+
 
 
 # Password validation

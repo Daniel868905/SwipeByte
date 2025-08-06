@@ -37,5 +37,8 @@ class FavoriteDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """Ensure users access only their own favorites."""
-        return Favorite.objects.filter(user_favorites=self.request.user)
+        """Allow access to user's favorites and group favorites they belong to."""
+        user = self.request.user
+        return Favorite.objects.filter(
+            Q(user_favorites=user) | Q(group_favorites__members=user)
+        )
