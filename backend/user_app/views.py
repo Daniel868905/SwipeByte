@@ -23,6 +23,8 @@ class Info(UserPermission):
                 "first_name": request.user.first_name,
                 "last_name": request.user.last_name,
                 "token": request.user.auth_token.key,
+                "latitude": request.user.latitude,
+                "longitude": request.user.longitude
             }
         )
     
@@ -98,4 +100,20 @@ class LogOut(UserPermission):
         token = user.auth_token
         logout(request)
         token.delete()
+        return Response({"success": True})
+    
+
+class Location(UserPermission):
+    def post(self, request):
+        latitude = request.data.get("latitude")
+        longitude = request.data.get("longitude")
+        if latitude is None or longitude is None:
+            return Response(
+                {"detail": "latitude and longitude required"},
+                status=s.HTTP_400_BAD_REQUEST,
+            )
+        user = request.user
+        user.latitude = latitude
+        user.longitude = longitude
+        user.save()
         return Response({"success": True})
