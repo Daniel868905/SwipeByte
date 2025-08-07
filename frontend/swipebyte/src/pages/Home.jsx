@@ -42,13 +42,16 @@ function Home({ isLoggedIn, token }) {
         <>
           <form onSubmit={handleSearch} className="row g-3 mb-4">
             <div className="col-md-6">
-              <input
-                type="number"
+              <select
                 name="distance"
-                className="form-control"
-                placeholder="Distance (meters)"
-                required
-              />
+                className="form-select"
+                defaultValue="15"
+              >
+                <option value="15">15 miles</option>
+                <option value="20">20 miles</option>
+                <option value="30">30 miles</option>
+                <option value="35">35 miles</option>
+              </select>
             </div>
             <div className="col-md-4">
               <input

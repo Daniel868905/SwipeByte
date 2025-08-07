@@ -13,7 +13,8 @@ class RestaurantSearchView(APIView):
     def get(self, request):
         latitude = float(request.query_params.get('lat', '40.7128'))
         longitude = float(request.query_params.get('lon', '-74.0060'))
-        distance = float(request.query_params.get('distance', '1600'))
+        distance_miles = float(request.query_params.get('distance', '15'))
+        distance = distance_miles * 1609.34
         price = request.query_params.get('price')
 
         user_likes = Favorite.objects.filter(

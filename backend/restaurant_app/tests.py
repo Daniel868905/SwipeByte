@@ -22,7 +22,7 @@ class RestaurantSearchViewTests(TestCase):
         user = User.objects.create_user(username='test', email='test@example.com', password='pass1234')
         token = Token.objects.create(user=user)
         client = Client(HTTP_AUTHORIZATION=f'Token {token.key}')
-        response = client.get('/api/v1/restaurants/?distance=500&price=1')
+        response = client.get('/api/v1/restaurants/?distance=15&price=1')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 1)
         self.assertEqual(response.json()[0]['name'], 'Test Restaurant')

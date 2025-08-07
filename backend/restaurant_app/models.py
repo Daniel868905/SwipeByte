@@ -24,8 +24,8 @@ class Restaurant(models.Model):
     location = models.CharField(max_length=100)
     rating = models.FloatField(null=True, blank=True)
     price = models.IntegerField(null=True, blank=True)
-    image_url = models.URLField(null=True, blank=True)
-    url = models.URLField(null=True, blank=True)
+    image_url = models.URLField(max_length=500, null=True, blank=True)
+    url = models.URLField(max_length=500, null=True, blank=True)
 
     def __str__(self) -> str:  # pragma: no cover - simple repr
         return self.name
