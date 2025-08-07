@@ -24,8 +24,9 @@ class Restaurant(models.Model):
     location = models.CharField(max_length=100)
     rating = models.FloatField(null=True, blank=True)
     price = models.IntegerField(null=True, blank=True)
-    image_url = models.URLField(max_length=500, null=True, blank=True)
-    url = models.URLField(max_length=500, null=True, blank=True)
-
+    # Some Google photo references and map URLs can exceed 500 characters,
+    # so we allow a more generous length to prevent database errors
+    image_url = models.URLField(max_length=2048, null=True, blank=True)
+    url = models.URLField(max_length=2048, null=True, blank=True)
     def __str__(self) -> str:  # pragma: no cover - simple repr
         return self.name

@@ -1,14 +1,38 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import RestaurantSwiper from '../components/RestaurantSwiper'
 
 function Home({ isLoggedIn, token }) {
   const [restaurants, setRestaurants] = useState([])
+  const [coords, setCoords] = useState({ lat: null, lon: null })
+
+  useEffect(() => {
+    if (!token) return
+    const fetchLocation = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/users/', {
+          headers: { Authorization: `Token ${token}` },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setCoords({ lat: data.latitude, lon: data.longitude })
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchLocation()
+  }, [token])
 
   const handleSearch = async (e) => {
     e.preventDefault()
     const distance = e.target.distance.value
     const price = e.target.price.value
-    const params = new URLSearchParams({ distance, price })
+    const paramsObj = { distance, price }
+    if (coords.lat != null && coords.lon != null) {
+      paramsObj.lat = coords.lat
+      paramsObj.lon = coords.lon
+    }
+    const params = new URLSearchParams(paramsObj)
     const res = await fetch(
       `http://localhost:8000/api/v1/restaurants/?${params.toString()}`,
       {
