@@ -7,6 +7,7 @@ function Home({ isLoggedIn, token }) {
   const [groups, setGroups] = useState([])
   const [target, setTarget] = useState('self')
   const [favorites, setFavorites] = useState([])
+  const [groupMatch, setGroupMatch] = useState(null)
 
   useEffect(() => {
     if (!token) return
@@ -44,7 +45,7 @@ function Home({ isLoggedIn, token }) {
     if (!token) return
     const fetchFavorites = async () => {
       try {
-        const url = new URL('http://localhost:8000/api/v1/favorites')
+        const url = new URL('http://localhost:8000/api/v1/favorites/')
         if (target !== 'self') {
           url.searchParams.append('group', target)
         }
@@ -61,6 +62,11 @@ function Home({ isLoggedIn, token }) {
     }
     fetchFavorites()
   }, [token, target])
+
+  useEffect(() => {
+    setGroupMatch(null)
+  }, [target])
+
 
   const sortRestaurants = (list) => {
     return [...list].sort((a, b) => {
@@ -123,6 +129,61 @@ function Home({ isLoggedIn, token }) {
     }
   }
 
+  const handleLike = async (restaurant) => {
+    if (target === 'self') return
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/v1/groups/${target}/swipe/`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ restaurant: restaurant.name, liked: true }),
+        },
+      )
+      if (res.ok) {
+        const data = await res.json()
+        if (data.matched) {
+          setGroupMatch(restaurant)
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+
+  const handleDislike = async (restaurant) => {
+    if (target === 'self') return
+    try {
+      await fetch(`http://localhost:8000/api/v1/groups/${target}/swipe/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({ restaurant: restaurant.name, liked: false }),
+      })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleReset = async () => {
+    if (target === 'self') return
+    try {
+      await fetch(`http://localhost:8000/api/v1/groups/${target}/reset/`, {
+        method: 'POST',
+        headers: { Authorization: `Token ${token}` },
+      })
+      setGroupMatch(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   return (
     <div className="container py-5">
       {!isLoggedIn && (
@@ -174,12 +235,36 @@ function Home({ isLoggedIn, token }) {
               </button>
             </div>
           </form>
-          <RestaurantSwiper
-            restaurants={restaurants}
-            favorites={favorites}
-            onLike={() => {}}
-            onFavoriteToggle={handleFavoriteToggle}
-          />
+          {groupMatch && target !== 'self' ? (
+            <div className="text-center">
+              <h3>Match found for {groupMatch.name}!</h3>
+              <p>
+                {groupMatch.price || 'N/A'} | Rating: {groupMatch.rating || 'N/A'}
+              </p>
+              {groupMatch.url && (
+                <p>
+                  <a
+                    href={groupMatch.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    More details
+                  </a>
+                </p>
+              )}
+              <button className="btn btn-secondary" onClick={handleReset}>
+                Reset
+              </button>
+            </div>
+          ) : (
+            <RestaurantSwiper
+              restaurants={restaurants}
+              favorites={favorites}
+              onLike={handleLike}
+              onDislike={handleDislike}
+              onFavoriteToggle={handleFavoriteToggle}
+            />
+          )}
         </>
       )}
     </div>

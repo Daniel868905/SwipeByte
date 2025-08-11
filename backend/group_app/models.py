@@ -25,10 +25,4 @@ class GroupSwipe(models.Model):
 
     def has_match(self):
         total = self.group.members.count()
-        if total == 0:
-            return False
-        if self.liked_by.count() >= total:
-            return True
-        if self.liked_by.count() >= (total // 2) + 1:
-            return True
-        return False
+        return total > 0 and self.liked_by.count() >= total

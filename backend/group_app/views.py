@@ -69,16 +69,38 @@ class GroupSwipeView(APIView):
 
         swipe.record_vote(request.user, liked)
 
-        matched = False
+        result = {'matched': False}
         if swipe.has_match():
             Favorite.objects.get_or_create(
                 group_favorites=group,
                 restaurant=swipe.restaurant,
                 defaults={'location': swipe.location},
             )
-            matched = True
+            result = {
+                'matched': True,
+                'restaurant': swipe.restaurant,
+                'location': swipe.location,
+            }
 
-        return Response({'matched': matched})
+
+        return Response(result)
+
+
+class GroupMatchResetView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, group_id):
+        group = get_object_or_404(Group, id=group_id)
+        if request.user not in group.members.all():
+            return Response(
+                {'error': 'Not a member of this group'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        group.swipes.all().delete()
+        Favorite.objects.filter(group_favorites=group).delete()
+        return Response({'status': 'reset'})
     
 class GroupMembersView(APIView):
     authentication_classes = [TokenAuthentication]

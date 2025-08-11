@@ -1,6 +1,13 @@
 import React, { useState } from 'react'
 
-function RestaurantSwiper({ restaurants, favorites, onLike, onFavoriteToggle }) {
+function RestaurantSwiper({
+  restaurants,
+  favorites,
+  onLike,
+  onDislike,
+  onFavoriteToggle,
+}) {
+
   const [index, setIndex] = useState(0)
 
   if (!restaurants.length) {
@@ -21,7 +28,10 @@ function RestaurantSwiper({ restaurants, favorites, onLike, onFavoriteToggle }) 
     setIndex((i) => i + 1)
   }
 
-    const handleDislike = () => {
+  const handleDislike = () => {
+    if (onDislike) {
+      onDislike(current)
+    }
     setIndex((i) => i + 1)
   }
 
