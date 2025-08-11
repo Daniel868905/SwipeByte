@@ -35,3 +35,23 @@ class AuthenticationFlowTests(APITestCase):
         second = self.client.post("/api/v1/users/signup/", data)
         self.assertEqual(second.status_code, 400)
         self.assertIn("error", second.data)
+
+
+class UserSwipeTests(APITestCase):
+    def setUp(self):
+        signup_data = {"email": "carol@example.com", "password": "pass123"}
+        res = self.client.post("/api/v1/users/signup/", signup_data)
+        self.token = res.data["token"]
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
+
+    def test_user_swipe_creates_favorite(self):
+        response = self.client.post(
+            "/api/v1/users/swipe/",
+            {"restaurant": "Test Place", "liked": True},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["matched"])
+
+        fav_response = self.client.get("/api/v1/favorites/")
+        self.assertEqual(len(fav_response.data), 1)
+        self.assertEqual(fav_response.data[0]["restaurant"], "Test Place")

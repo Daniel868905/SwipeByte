@@ -7,7 +7,7 @@ function Home({ isLoggedIn, token }) {
   const [groups, setGroups] = useState([])
   const [target, setTarget] = useState('self')
   const [favorites, setFavorites] = useState([])
-  const [groupMatch, setGroupMatch] = useState(null)
+  const [match, setMatch] = useState(null)
 
   useEffect(() => {
     if (!token) return
@@ -64,7 +64,7 @@ function Home({ isLoggedIn, token }) {
   }, [token, target])
 
   useEffect(() => {
-    setGroupMatch(null)
+    setMatch(null)
   }, [target])
 
 
@@ -130,23 +130,39 @@ function Home({ isLoggedIn, token }) {
   }
 
   const handleLike = async (restaurant) => {
-    if (target === 'self') return
     try {
-      const res = await fetch(
-        `http://localhost:8000/api/v1/groups/${target}/swipe/`,
-        {
+      if (target === 'self') {
+        const res = await fetch(`http://localhost:8000/api/v1/users/swipe/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Token ${token}`,
           },
           body: JSON.stringify({ restaurant: restaurant.name, liked: true }),
-        },
-      )
-      if (res.ok) {
-        const data = await res.json()
-        if (data.matched) {
-          setGroupMatch(restaurant)
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.matched) {
+            setMatch(restaurant)
+          }
+        }
+      } else {
+        const res = await fetch(
+          `http://localhost:8000/api/v1/groups/${target}/swipe/`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Token ${token}`,
+            },
+            body: JSON.stringify({ restaurant: restaurant.name, liked: true }),
+          },
+        )
+        if (res.ok) {
+          const data = await res.json()
+          if (data.matched) {
+            setMatch(restaurant)
+          }
         }
       }
     } catch (err) {
@@ -156,29 +172,46 @@ function Home({ isLoggedIn, token }) {
 
 
   const handleDislike = async (restaurant) => {
-    if (target === 'self') return
     try {
-      await fetch(`http://localhost:8000/api/v1/groups/${target}/swipe/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify({ restaurant: restaurant.name, liked: false }),
-      })
+      if (target === 'self') {
+        await fetch(`http://localhost:8000/api/v1/users/swipe/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ restaurant: restaurant.name, liked: false }),
+        })
+      } else {
+        await fetch(`http://localhost:8000/api/v1/groups/${target}/swipe/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ restaurant: restaurant.name, liked: false }),
+        })
+      }
     } catch (err) {
       console.error(err)
     }
   }
 
   const handleReset = async () => {
-    if (target === 'self') return
     try {
-      await fetch(`http://localhost:8000/api/v1/groups/${target}/reset/`, {
-        method: 'POST',
-        headers: { Authorization: `Token ${token}` },
-      })
-      setGroupMatch(null)
+      if (target === 'self') {
+        await fetch(`http://localhost:8000/api/v1/users/reset/`, {
+          method: 'POST',
+          headers: { Authorization: `Token ${token}` },
+        })
+      } else {
+        await fetch(`http://localhost:8000/api/v1/groups/${target}/reset/`, {
+          method: 'POST',
+          headers: { Authorization: `Token ${token}` },
+        })
+      }
+      setMatch(null)
+
     } catch (err) {
       console.error(err)
     }
@@ -235,16 +268,16 @@ function Home({ isLoggedIn, token }) {
               </button>
             </div>
           </form>
-          {groupMatch && target !== 'self' ? (
+          {match ? (
             <div className="text-center">
-              <h3>Match found for {groupMatch.name}!</h3>
+              <h3>Match found for {match.name}!</h3>
               <p>
-                {groupMatch.price || 'N/A'} | Rating: {groupMatch.rating || 'N/A'}
+                {match.price || 'N/A'} | Rating: {match.rating || 'N/A'}
               </p>
-              {groupMatch.url && (
+              {match.url && (
                 <p>
                   <a
-                    href={groupMatch.url}
+                    href={match.url}
                     target="_blank"
                     rel="noreferrer"
                   >

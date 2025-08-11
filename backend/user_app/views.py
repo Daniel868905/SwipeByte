@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import User
+from .models import User, UserSwipe
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError
-# Create your views here.
+from favorite_app.models import Favorite
    
 class UserPermission(APIView):  
     authentication_classes = [TokenAuthentication]
@@ -117,3 +117,43 @@ class Location(UserPermission):
         user.longitude = longitude
         user.save()
         return Response({"success": True})
+
+
+class UserSwipeView(UserPermission):
+    def post(self, request):
+        restaurant = request.data.get('restaurant')
+        location = request.data.get('location', '')
+        liked = request.data.get('liked', True)
+        if not restaurant:
+            return Response({'error': 'Restaurant is required'}, status=s.HTTP_400_BAD_REQUEST)
+
+        swipe, _ = UserSwipe.objects.get_or_create(
+            user=request.user,
+            restaurant=restaurant,
+            defaults={'location': location, 'liked': liked},
+        )
+        if location and not swipe.location:
+            swipe.location = location
+        swipe.record_vote(liked)
+
+        result = {'matched': False}
+        if swipe.has_match():
+            Favorite.objects.get_or_create(
+                user_favorites=request.user,
+                restaurant=swipe.restaurant,
+                defaults={'location': swipe.location},
+            )
+            result = {
+                'matched': True,
+                'restaurant': swipe.restaurant,
+                'location': swipe.location,
+            }
+
+        return Response(result)
+
+
+class UserMatchResetView(UserPermission):
+    def post(self, request):
+        request.user.swipes.all().delete()
+        Favorite.objects.filter(user_favorites=request.user).delete()
+        return Response({'status': 'reset'})

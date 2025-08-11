@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 function RestaurantSwiper({
   restaurants,
@@ -8,17 +8,23 @@ function RestaurantSwiper({
   onFavoriteToggle,
 }) {
 
+  const [list, setList] = useState(restaurants)
   const [index, setIndex] = useState(0)
 
-  if (!restaurants.length) {
+  useEffect(() => {
+    setList(restaurants)
+    setIndex(0)
+  }, [restaurants])
+
+  if (!list.length) {
     return <p className="text-center">No restaurants loaded.</p>
   }
 
-  if (index >= restaurants.length) {
+  if (index >= list.length) {
     return <p className="text-center">No more restaurants.</p>
   }
 
-  const current = restaurants[index]
+  const current = list[index]
   const isFavorite = favorites.some((f) => f.restaurant === current.name)
 
   const handleLike = () => {
@@ -32,6 +38,21 @@ function RestaurantSwiper({
     if (onDislike) {
       onDislike(current)
     }
+        setList((prev) => {
+      const currentName = prev[index].name
+      const before = prev.slice(0, index + 1)
+      const after = prev.slice(index + 1)
+      const filtered = []
+      const duplicates = []
+      for (const r of after) {
+        if (r.name === currentName) {
+          duplicates.push(r)
+        } else {
+          filtered.push(r)
+        }
+      }
+      return [...before, ...filtered, ...duplicates]
+    })
     setIndex((i) => i + 1)
   }
 
