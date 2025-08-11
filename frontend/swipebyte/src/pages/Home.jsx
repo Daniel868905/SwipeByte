@@ -220,7 +220,7 @@ function Home({ isLoggedIn, token }) {
   return (
     <div className="container py-5">
       {!isLoggedIn && (
-        <div className="p-5 mb-4 bg-body-tertiary rounded-3 text-center">
+        <div className="p-5 mb-4 rounded-3 text-center welcome-box">
           <h1 className="display-5 fw-bold">Welcome to SwipeByte</h1>
           <p className="fs-5">Create an account or log in to start using the app.</p>
         </div>
