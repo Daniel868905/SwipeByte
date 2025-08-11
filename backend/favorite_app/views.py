@@ -22,9 +22,14 @@ class FavoriteListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """Return favorites for the current user or a specified group."""
+        """Return favorites for the current user, optionally filtered."""
         user = self.request.user
+        restaurant = self.request.query_params.get('restaurant')
         group_id = self.request.query_params.get('group')
+        if restaurant:
+            return Favorite.objects.filter(restaurant=restaurant).filter(
+                Q(user_favorites=user) | Q(group_favorites__members=user)  # type: ignore
+            )
         if group_id:
             return Favorite.objects.filter(
                 group_favorites_id=group_id,

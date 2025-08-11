@@ -10,6 +10,9 @@ function RestaurantSwiper({
 
   const [list, setList] = useState(restaurants)
   const [index, setIndex] = useState(0)
+  const [animating, setAnimating] = useState(false)
+  const [direction, setDirection] = useState('')
+  const [action, setAction] = useState(null)
 
   useEffect(() => {
     setList(restaurants)
@@ -28,32 +31,48 @@ function RestaurantSwiper({
   const isFavorite = favorites.some((f) => f.restaurant === current.name)
 
   const handleLike = () => {
-    if (onLike) {
-      onLike(current)
-    }
-    setIndex((i) => i + 1)
+    setDirection('right')
+    setAction('like')
+    setAnimating(true)
   }
 
   const handleDislike = () => {
-    if (onDislike) {
-      onDislike(current)
-    }
-        setList((prev) => {
-      const currentName = prev[index].name
-      const before = prev.slice(0, index + 1)
-      const after = prev.slice(index + 1)
-      const filtered = []
-      const duplicates = []
-      for (const r of after) {
-        if (r.name === currentName) {
-          duplicates.push(r)
-        } else {
-          filtered.push(r)
-        }
+    setDirection('left')
+    setAction('dislike')
+    setAnimating(true)
+  }
+
+  const handleAnimationEnd = () => {
+    if (action === 'like') {
+      if (onLike) {
+        onLike(current)
       }
-      return [...before, ...filtered, ...duplicates]
-    })
-    setIndex((i) => i + 1)
+      setIndex((i) => i + 1)
+    } else if (action === 'dislike') {
+      if (onDislike) {
+        onDislike(current)
+      }
+      setList((prev) => {
+        const currentName = prev[index].name
+        const before = prev.slice(0, index + 1)
+        const after = prev.slice(index + 1)
+        const filtered = []
+        const duplicates = []
+        for (const r of after) {
+          if (r.name === currentName) {
+            duplicates.push(r)
+          } else {
+            filtered.push(r)
+          }
+        }
+        return [...before, ...filtered, ...duplicates]
+      })
+      setIndex((i) => i + 1)
+    }
+    setAnimating(false)
+    setDirection('')
+    setAction(null)
+
   }
 
   const handleFavorite = () => {
@@ -62,9 +81,21 @@ function RestaurantSwiper({
 
 
   return (
-    <div className="card mx-auto" style={{ width: '18rem' }}>
+    <div
+      className={`card mx-auto pastel-card swipe-card ${
+        animating ? `swipe-${direction}` : ''
+      }`}
+      style={{ width: '18rem' }}
+      onAnimationEnd={handleAnimationEnd}
+    >
+
       {current.image_url && (
-        <img src={current.image_url} className="card-img-top" alt={current.name} />
+        <img
+          src={current.image_url}
+          className="card-img-top"
+          alt={current.name}
+          style={{ height: '200px', objectFit: 'cover' }}
+        />
       )}
       <div className="card-body text-center">
         <h5 className="card-title">{current.name}</h5>
@@ -72,16 +103,13 @@ function RestaurantSwiper({
           {current.price || 'N/A'} | Rating: {current.rating || 'N/A'}
         </p>
         <div className="d-flex justify-content-around">
-          <button className="btn btn-danger" onClick={handleDislike}>
+          <button className="btn btn-dislike" onClick={handleDislike}>
             Dislike
           </button>
-          <button
-            className="btn btn-warning"
-            onClick={handleFavorite}
-          >
+          <button className="btn btn-favorite" onClick={handleFavorite}>
             {isFavorite ? 'Unfavorite' : 'Favorite'}
           </button>
-          <button className="btn btn-success" onClick={handleLike}>
+          <button className="btn btn-like" onClick={handleLike}>
             Like
           </button>
         </div>

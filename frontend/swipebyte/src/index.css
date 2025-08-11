@@ -13,5 +13,93 @@
 
 body {
   margin: 0;
+  background-color: #f8f4f0;
+  color: #333;
+}
 
+.swipe-card {
+  position: relative;
+}
+
+.swipe-right {
+  animation: swipeRight 0.5s forwards;
+}
+
+.swipe-left {
+  animation: swipeLeft 0.5s forwards;
+}
+
+@keyframes swipeRight {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes swipeLeft {
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+.pastel-card {
+  background-color: #fff;
+  border: 1px solid #e2dcd5;
+}
+
+.btn-like,
+.btn-dislike,
+.btn-favorite {
+  color: #333;
+  border-width: 1px;
+}
+
+.btn-like {
+  background-color: #b8e0d2;
+  border-color: #b8e0d2;
+}
+
+.btn-like:hover {
+  background-color: #a5d5c5;
+}
+
+.btn-dislike {
+  background-color: #f5b5b5;
+  border-color: #f5b5b5;
+}
+
+.btn-dislike:hover {
+  background-color: #f29f9f;
+}
+
+.btn-favorite {
+  background-color: #ffe0b5;
+  border-color: #ffe0b5;
+}
+
+.btn-favorite:hover {
+  background-color: #ffd498;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
 }
