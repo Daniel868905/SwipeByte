@@ -19,6 +19,12 @@ class GroupSummarySerializer(serializers.ModelSerializer):
 class FavoriteSerializer(serializers.ModelSerializer):
     user_favorites = UserSummarySerializer(read_only=True)
     group_favorites = GroupSummarySerializer(read_only=True)
+    group_favorites_id = serializers.PrimaryKeyRelatedField(
+        queryset=Group.objects.all(),
+        source='group_favorites',
+        write_only=True,
+        required=False,
+    )
     yelp_review = serializers.SerializerMethodField()
 
     class Meta:
@@ -27,9 +33,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
             'id',
             'user_favorites',
             'group_favorites',
+            'group_favorites_id',
             'restaurant',
             'location',
             'review',
+            'visited',
             'yelp_review',
         ]
 

@@ -8,6 +8,7 @@ authenticated user.
 
 from rest_framework import generics, permissions
 from rest_framework.authentication import TokenAuthentication
+from django.db.models import Q
 
 from .models import Favorite
 from .serializers import FavoriteSerializer
@@ -21,9 +22,15 @@ class FavoriteListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """Return favorites for the current user."""
-        return Favorite.objects.filter(user_favorites=self.request.user)
-
+        """Return favorites for the current user or a specified group."""
+        user = self.request.user
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            return Favorite.objects.filter(
+                group_favorites_id=group_id,
+                group_favorites__members=user,
+            )
+        return Favorite.objects.filter(user_favorites=user)
     def perform_create(self, serializer):
         """Associate the created favorite with the current user."""
         serializer.save(user_favorites=self.request.user)

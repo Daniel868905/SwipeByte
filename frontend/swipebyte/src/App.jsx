@@ -5,6 +5,7 @@ import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Group from './pages/Group'
 import Groups from './pages/Groups'
+import Favorites from './pages/Favorites'
 import './App.css'
 
 const API_BASE ='http://localhost:8000/api/v1/users'
@@ -60,6 +61,8 @@ function App() {
     page = <Groups token={token} />
   } else if (view === 'group') {
     page = <Group token={token} />
+  } else if (view === 'favorites') {
+    page = <Favorites token={token} />
   } else {
     page = <Home isLoggedIn={!!token} token={token} />
   }

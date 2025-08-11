@@ -8,3 +8,4 @@ class Favorite(models.Model):
     restaurant = models.CharField(max_length=255)
     location = models.CharField(max_length=255, blank=True, default='')
     review = models.TextField(max_length=1000, blank=True, default='')
+    visited = models.BooleanField(default=False)
