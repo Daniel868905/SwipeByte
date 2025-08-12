@@ -38,3 +38,6 @@ The backend is configured for secure production use:
   environment variables to match your Amazon AWS domain.
 * ``SECURE_SSL_REDIRECT`` and HSTS are enabled by default. Ensure your load
   balancer forwards the ``X-Forwarded-Proto`` header.
+
+pip install django-extensions
+python manage.py runserver_plus --cert-file dev-cert.pem 0.0.0.0:8000

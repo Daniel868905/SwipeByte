@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'group_app',
     'favorite_app',
     'restaurant_app',
-    
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
