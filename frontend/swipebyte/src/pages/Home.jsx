@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import RestaurantSwiper from '../components/RestaurantSwiper'
 
 function Home({ isLoggedIn, token }) {
@@ -68,13 +68,17 @@ function Home({ isLoggedIn, token }) {
   }, [target])
 
 
-  const sortRestaurants = (list) => {
-    return [...list].sort((a, b) => {
-      const aFav = favorites.some((f) => f.restaurant === a.name)
-      const bFav = favorites.some((f) => f.restaurant === b.name)
-      return bFav - aFav
-    })
-  }
+  const sortRestaurants = useCallback(
+    (list) => {
+      return [...list].sort((a, b) => {
+        const aFav = favorites.some((f) => f.restaurant === a.name)
+        const bFav = favorites.some((f) => f.restaurant === b.name)
+        return bFav - aFav
+      })
+    },
+    [favorites],
+  )
+
 
 
   const handleSearch = async (e) => {
@@ -99,7 +103,7 @@ function Home({ isLoggedIn, token }) {
 
   useEffect(() => {
     setRestaurants((prev) => sortRestaurants(prev))
-  }, [favorites])
+  }, [favorites, sortRestaurants])
 
   const handleFavoriteToggle = async (restaurant) => {
     const existing = favorites.find((f) => f.restaurant === restaurant.name)

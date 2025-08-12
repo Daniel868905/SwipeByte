@@ -45,7 +45,8 @@ class RestaurantSearchViewTests(TestCase):
             username="test", email="test@example.com", password="pass1234"
         )
         token = Token.objects.create(user=user)
-        client = Client(HTTP_AUTHORIZATION=f"Token {token.key}")
+        client = Client()
+        client.cookies["auth_token"] = token.key
         response = client.get(
             "/api/v1/restaurants/?distance=15&price=1&lat=1&lon=2"
         )

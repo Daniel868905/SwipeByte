@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 function Favorites({ token }) {
   const [favorites, setFavorites] = useState([])
@@ -6,7 +6,7 @@ function Favorites({ token }) {
   const [selected, setSelected] = useState(null)
   const [comments, setComments] = useState([])
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:8000/api/v1/favorites/', {
         headers: { Authorization: `Token ${token}` },
@@ -18,13 +18,13 @@ function Favorites({ token }) {
     } catch (err) {
       console.error(err)
     }
-  }
+  }, [token])
 
   useEffect(() => {
     if (token) {
       fetchFavorites()
     }
-  }, [token])
+  }, [token, fetchFavorites])
 
   const toggleVisited = async (fav) => {
     try {

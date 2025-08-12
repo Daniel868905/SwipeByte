@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 function Groups({ token }) {
   const [groups, setGroups] = useState([])
   const [newMembers, setNewMembers] = useState({})
 
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:8000/api/v1/groups/', {
         headers: { Authorization: `Token ${token}` },
@@ -16,11 +16,11 @@ function Groups({ token }) {
     } catch (e) {
       console.error(e)
     }
-  }
+  }, [token])
 
   useEffect(() => {
     fetchGroups()
-  }, [])
+  }, [fetchGroups])
 
 
    const handleAdd = async (groupId) => {

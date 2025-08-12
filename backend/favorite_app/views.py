@@ -7,7 +7,7 @@ authenticated user.
 """
 
 from rest_framework import generics, permissions
-from rest_framework.authentication import TokenAuthentication
+from user_app.authentication import CookieTokenAuthentication
 from django.db.models import Q
 
 from .models import Favorite
@@ -18,7 +18,7 @@ class FavoriteListCreateView(generics.ListCreateAPIView):
     """List authenticated user's favorites or create a new one."""
 
     serializer_class = FavoriteSerializer
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -45,7 +45,7 @@ class FavoriteDetailView(generics.RetrieveUpdateDestroyAPIView):
     """Retrieve, update or delete a specific favorite."""
 
     serializer_class = FavoriteSerializer
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
