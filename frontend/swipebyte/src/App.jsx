@@ -43,7 +43,7 @@ function App() {
   const handleLogout = async () => {
     if (!token) return
     try {
-      await fetch(`${API_BASE}/logout/`, {
+      await fetch(`${API_BASE_URL}/logout/`, {
         method: 'POST',
         headers: { Authorization: `Token ${token}` },
       })

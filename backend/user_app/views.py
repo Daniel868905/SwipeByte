@@ -16,6 +16,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from .authentication import CookieTokenAuthentication
+from django.conf import settings
    
 class UserPermission(APIView):
     authentication_classes = [CookieTokenAuthentication]
@@ -111,8 +112,19 @@ class LogIn(APIView):
         if user:
             token_obj, _ = Token.objects.get_or_create(user=user)
             login(request=request, user=user)
-            response = Response({'detail': 'Logged in'}, status=s.HTTP_200_OK)
-            response.set_cookie('auth_token', token_obj.key, httponly=True, secure=True, samesite='None')
+            response = Response(
+                {'detail': 'Logged in', 'token': token_obj.key},
+                status=s.HTTP_200_OK,
+            )
+            secure_cookie = not settings.DEBUG
+            samesite = 'None' if secure_cookie else 'Lax'
+            response.set_cookie(
+                'auth_token',
+                token_obj.key,
+                httponly=True,
+                secure=secure_cookie,
+                samesite=samesite,
+            )
             return response
         else:
             return Response(

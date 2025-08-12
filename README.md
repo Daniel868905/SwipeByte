@@ -16,7 +16,9 @@ Clone the repository and set up both the backend and frontend.
 ### Frontend
 1. `cd frontend/swipebyte`
 2. Install packages: `npm install`
-3. Start the development server: `npm run dev`
+3.(Optional) set the backend URL: `export VITE_API_BASE_URL=http://localhost:8000`
+4. Start the development server: `npm run dev`
+
 
 ## Story of Operations
 1. New users sign up or existing users log in.
