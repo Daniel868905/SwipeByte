@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import { API_BASE_URL } from '../config'
 
 function Groups({ token }) {
   const [groups, setGroups] = useState([])
@@ -6,7 +7,7 @@ function Groups({ token }) {
 
   const fetchGroups = useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/v1/groups/', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/groups/`, {
         headers: { Authorization: `Token ${token}` },
       })
       const data = await res.json()
@@ -31,7 +32,7 @@ function Groups({ token }) {
     if (!members.length) return
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/groups/${groupId}/members/`,
+        `${API_BASE_URL}/api/v1/groups/${groupId}/members/`,
         {
           method: 'POST',
           headers: {
@@ -53,7 +54,7 @@ function Groups({ token }) {
   const handleRemove = async (groupId, email) => {
     try {
       const res = await fetch(
-        `https://localhost:8000/api/v1/groups/${groupId}/members/`,
+        `${API_BASE_URL}/api/v1/groups/${groupId}/members/`,
         {
           method: 'DELETE',
           headers: {

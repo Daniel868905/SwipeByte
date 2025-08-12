@@ -7,9 +7,10 @@ import Group from './pages/Group'
 import Groups from './pages/Groups'
 import Favorites from './pages/Favorites'
 import Info from './pages/Info'
+import { API_BASE_URL } from './config'
 import './App.css'
 
-const API_BASE = 'https://localhost:8000/api/v1/users'
+const USER_API = `${API_BASE_URL}/api/v1/users`
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token'))
@@ -55,9 +56,9 @@ function App() {
 
   let page
   if (view === 'signup') {
-    page = <Signup onAuth={handleAuth} backendUrl={API_BASE} />
+    page = <Signup onAuth={handleAuth} backendUrl={USER_API} />
   } else if (view === 'login') {
-    page = <Login onAuth={handleAuth} backendUrl={API_BASE} />
+    page = <Login onAuth={handleAuth} backendUrl={USER_API} />
   } else if (view === 'groups') {
     page = <Groups token={token} />
   } else if (view === 'group') {
@@ -65,7 +66,7 @@ function App() {
   } else if (view === 'favorites') {
     page = <Favorites token={token} />
   } else if (view === 'info') {
-    page = <Info token={token} backendUrl={API_BASE} />
+    page = <Info token={token} backendUrl={USER_API} />
   } else {
     page = <Home isLoggedIn={!!token} token={token} />
   }
