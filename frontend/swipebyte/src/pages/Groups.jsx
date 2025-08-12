@@ -53,7 +53,7 @@ function Groups({ token }) {
   const handleRemove = async (groupId, email) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/groups/${groupId}/members/`,
+        `https://localhost:8000/api/v1/groups/${groupId}/members/`,
         {
           method: 'DELETE',
           headers: {

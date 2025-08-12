@@ -13,7 +13,7 @@ function Home({ isLoggedIn, token }) {
     if (!token) return
     const fetchLocation = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/v1/users/', {
+        const res = await fetch('https://localhost:8000/api/v1/users/', {
           headers: { Authorization: `Token ${token}` },
         })
         if (res.ok) {
@@ -26,7 +26,7 @@ function Home({ isLoggedIn, token }) {
     }
     const fetchGroups = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/v1/groups/', {
+        const res = await fetch('https://localhost:8000/api/v1/groups/', {
           headers: { Authorization: `Token ${token}` },
         })
         if (res.ok) {
@@ -45,7 +45,7 @@ function Home({ isLoggedIn, token }) {
     if (!token) return
     const fetchFavorites = async () => {
       try {
-        const url = new URL('http://localhost:8000/api/v1/favorites/')
+        const url = new URL('https://localhost:8000/api/v1/favorites/')
         if (target !== 'self') {
           url.searchParams.append('group', target)
         }
@@ -92,7 +92,7 @@ function Home({ isLoggedIn, token }) {
     }
     const params = new URLSearchParams(paramsObj)
     const res = await fetch(
-      `http://localhost:8000/api/v1/restaurants/?${params.toString()}`,
+      `https://localhost:8000/api/v1/restaurants/?${params.toString()}`,
       {
         headers: { Authorization: `Token ${token}` },
       },
@@ -108,7 +108,7 @@ function Home({ isLoggedIn, token }) {
   const handleFavoriteToggle = async (restaurant) => {
     const existing = favorites.find((f) => f.restaurant === restaurant.name)
     if (existing) {
-      await fetch(`http://localhost:8000/api/v1/favorites/${existing.id}/`, {
+      await fetch(`https://localhost:8000/api/v1/favorites/${existing.id}/`, {
         method: 'DELETE',
         headers: { Authorization: `Token ${token}` },
       })
@@ -118,7 +118,7 @@ function Home({ isLoggedIn, token }) {
       if (target !== 'self') {
         body.group_favorites_id = target
       }
-      const res = await fetch('http://localhost:8000/api/v1/favorites/', {
+      const res = await fetch('https://localhost:8000/api/v1/favorites/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ function Home({ isLoggedIn, token }) {
   const handleLike = async (restaurant) => {
     try {
       if (target === 'self') {
-        const res = await fetch(`http://localhost:8000/api/v1/users/swipe/`, {
+        const res = await fetch(`https://localhost:8000/api/v1/users/swipe/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ function Home({ isLoggedIn, token }) {
         }
       } else {
         const res = await fetch(
-          `http://localhost:8000/api/v1/groups/${target}/swipe/`,
+          `https://localhost:8000/api/v1/groups/${target}/swipe/`,
           {
             method: 'POST',
             headers: {
@@ -178,7 +178,7 @@ function Home({ isLoggedIn, token }) {
   const handleDislike = async (restaurant) => {
     try {
       if (target === 'self') {
-        await fetch(`http://localhost:8000/api/v1/users/swipe/`, {
+        await fetch(`https://localhost:8000/api/v1/users/swipe/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -187,7 +187,7 @@ function Home({ isLoggedIn, token }) {
           body: JSON.stringify({ restaurant: restaurant.name, liked: false }),
         })
       } else {
-        await fetch(`http://localhost:8000/api/v1/groups/${target}/swipe/`, {
+        await fetch(`https://localhost:8000/api/v1/groups/${target}/swipe/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -204,12 +204,12 @@ function Home({ isLoggedIn, token }) {
   const handleReset = async () => {
     try {
       if (target === 'self') {
-        await fetch(`http://localhost:8000/api/v1/users/reset/`, {
+        await fetch(`https://localhost:8000/api/v1/users/reset/`, {
           method: 'POST',
           headers: { Authorization: `Token ${token}` },
         })
       } else {
-        await fetch(`http://localhost:8000/api/v1/groups/${target}/reset/`, {
+        await fetch(`https://localhost:8000/api/v1/groups/${target}/reset/`, {
           method: 'POST',
           headers: { Authorization: `Token ${token}` },
         })

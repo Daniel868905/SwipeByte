@@ -9,7 +9,7 @@ import Favorites from './pages/Favorites'
 import Info from './pages/Info'
 import './App.css'
 
-const API_BASE ='http://localhost:8000/api/v1/users'
+const API_BASE = 'https://localhost:8000/api/v1/users'
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token'))

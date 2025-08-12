@@ -12,7 +12,7 @@ function Group({ token }) {
       .map((u) => u.trim())
       .filter(Boolean)
     try {
-      const res = await fetch('http://localhost:8000/api/v1/groups/', {
+      const res = await fetch('https://localhost:8000/api/v1/groups/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
