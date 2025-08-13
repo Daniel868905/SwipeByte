@@ -8,7 +8,7 @@ from .views import (
     UserSwipeView,
     UserMatchResetView,
     PasswordResetView,
-    VerifyEmail,
+
 )
 
 
@@ -20,6 +20,5 @@ urlpatterns = [
     path("location/", Location.as_view()),
     path("swipe/", UserSwipeView.as_view()),
     path("reset/", UserMatchResetView.as_view()),
-    path("verify/<uidb64>/<token>/", VerifyEmail.as_view(), name="verify-email"),
-        path("password/", PasswordResetView.as_view()),
+    path("password/", PasswordResetView.as_view()),
 ]

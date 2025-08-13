@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .models import User, UserSwipe
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
@@ -10,11 +9,6 @@ from django.db import IntegrityError
 from favorite_app.models import Favorite
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
-from django.urls import reverse
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.contrib.auth.tokens import default_token_generator
 from .authentication import CookieTokenAuthentication
 from django.conf import settings
    
@@ -71,7 +65,7 @@ class SignUp(APIView):
                 last_name=last_name,
                 is_staff=False,
                 is_superuser=False,
-                is_active=False,
+                is_active=True,
             )
         except IntegrityError:
             return Response(
@@ -81,19 +75,7 @@ class SignUp(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
 
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        verification_url = request.build_absolute_uri(
-            reverse('verify-email', kwargs={'uidb64': uid, 'token': token})
-        )
-        send_mail(
-            "Verify your SwipeByte account",
-            f"Click the link to verify your email: {verification_url}",
-            None,
-            [user.email],
-            fail_silently=True,
-        )
-        return Response({"detail": "Verification email sent"}, status=s.HTTP_201_CREATED)
+        return Response({"detail": "User created"}, status=s.HTTP_201_CREATED)
         
 class LogIn(APIView):
     
@@ -220,20 +202,3 @@ class PasswordResetView(UserPermission):
         request.user.set_password(new_password)
         request.user.save()
         return Response({"success": True})
-
-
-class VerifyEmail(APIView):
-    """Activate a user's account when they click the email link."""
-
-    def get(self, request, uidb64, token):
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
-
-        if user and default_token_generator.check_token(user, token):
-            user.is_active = True
-            user.save()
-            return Response({"detail": "Email verified"})
-        return Response({"detail": "Invalid verification link"}, status=s.HTTP_400_BAD_REQUEST)
