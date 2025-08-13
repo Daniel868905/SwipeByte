@@ -1,3 +1,5 @@
 .env
 __pycache__
 .venv
+dev-cert.ckt
+dev-cert.key

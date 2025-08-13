@@ -26,11 +26,15 @@ load_dotenv()
 # Use an environment variable if provided, otherwise fall back to a
 # hardcoded key suitable for tests and development. This avoids runtime
 # errors when ``DJANGO_SECRET_KEY`` is not defined.
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'dev-secret-key')
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: don't run with debug turned on in production!
+# ``DJANGO_DEBUG`` can be set to ``False`` in production.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') != 'False'
+
+# Hosts and origins are configurable so the project can run on AWS.
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else []
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if os.environ.get('CSRF_TRUSTED_ORIGINS') else []
 
 
 # Application definition
@@ -49,7 +53,7 @@ INSTALLED_APPS = [
     'group_app',
     'favorite_app',
     'restaurant_app',
-    
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -89,7 +93,7 @@ WSGI_APPLICATION = 'swipebyte.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.environ.get('DB_NAME'),
+        'NAME': os.environ.get('DB_NAME') or BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -143,10 +147,38 @@ AUTH_USER_MODEL = 'user_app.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication'
+        'user_app.authentication.CookieTokenAuthentication',
     ]
 }
 
-CORS_ALLOWED_ORIGINS = [
+# CORS and CSRF configuration so the frontend can make credentialed requests.
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if os.environ.get('CORS_ALLOWED_ORIGINS') else [
     "http://localhost:5173",
 ]
+CORS_ALLOW_CREDENTIALS = True
+
+
+# Email configuration - defaults to console backend but can be overridden
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend'
+)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False').lower() == 'true'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@swipebyte.local')
+
+# Security settings for HTTPS deployments such as AWS.
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@example.com')

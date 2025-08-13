@@ -16,7 +16,9 @@ Clone the repository and set up both the backend and frontend.
 ### Frontend
 1. `cd frontend/swipebyte`
 2. Install packages: `npm install`
-3. Start the development server: `npm run dev`
+3.(Optional) set the backend URL: `export VITE_API_BASE_URL=http://localhost:8000`
+4. Start the development server: `npm run dev`
+
 
 ## Story of Operations
 1. New users sign up or existing users log in.
@@ -25,3 +27,19 @@ Clone the repository and set up both the backend and frontend.
 4. Liked restaurants may match with other members, and matches are displayed.
 5. Favorites can be saved for quick access.
 6. The theme toggle in the navigation bar switches between light and dark modes with food-and-code inspired backgrounds.
+
+## Deployment Notes
+
+The backend is configured for secure production use:
+
+* Email verification is required for new accounts. Configure SMTP settings via
+  ``EMAIL_BACKEND`` and ``DEFAULT_FROM_EMAIL`` environment variables.
+* Authentication tokens are stored in an ``auth_token`` cookie and all cookies
+  are marked ``Secure`` and ``HttpOnly``. Serve the app over HTTPS.
+* Set ``ALLOWED_HOSTS``, ``CSRF_TRUSTED_ORIGINS`` and ``CORS_ALLOWED_ORIGINS``
+  environment variables to match your Amazon AWS domain.
+* ``SECURE_SSL_REDIRECT`` and HSTS are enabled by default. Ensure your load
+  balancer forwards the ``X-Forwarded-Proto`` header.
+
+pip install django-extensions
+python manage.py runserver_plus --cert-file dev-cert.pem 0.0.0.0:8000

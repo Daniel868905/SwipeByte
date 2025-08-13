@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { API_BASE_URL } from '../config'
 
 function Favorites({ token }) {
   const [favorites, setFavorites] = useState([])
@@ -6,9 +7,9 @@ function Favorites({ token }) {
   const [selected, setSelected] = useState(null)
   const [comments, setComments] = useState([])
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/v1/favorites/', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/favorites/`, {
         headers: { Authorization: `Token ${token}` },
       })
       if (res.ok) {
@@ -18,13 +19,13 @@ function Favorites({ token }) {
     } catch (err) {
       console.error(err)
     }
-  }
+  }, [token])
 
   useEffect(() => {
     if (token) {
       fetchFavorites()
     }
-  }, [token])
+  }, [token, fetchFavorites])
 
   const toggleVisited = async (fav) => {
     try {
@@ -34,7 +35,7 @@ function Favorites({ token }) {
         review = prompt('Leave a comment', fav.review || '') || ''
       }
 
-      await fetch(`http://localhost:8000/api/v1/favorites/${fav.id}/`, {
+      await fetch(`${API_BASE_URL}/api/v1/favorites/${fav.id}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +56,7 @@ function Favorites({ token }) {
     setSelected(fav)
     try {
       const res = await fetch(
-        `http://localhost:8000/api/v1/favorites/?restaurant=${encodeURIComponent(
+        `${API_BASE_URL}/api/v1/favorites/?restaurant=${encodeURIComponent(
           fav.restaurant,
         )}`,
         {
@@ -82,7 +83,7 @@ function Favorites({ token }) {
 
   const removeFavorite = async (fav) => {
     try {
-      await fetch(`http://localhost:8000/api/v1/favorites/${fav.id}/`, {
+      await fetch(`${API_BASE_URL}/api/v1/favorites/${fav.id}/`, {
         method: 'DELETE',
         headers: { Authorization: `Token ${token}` },
       })    

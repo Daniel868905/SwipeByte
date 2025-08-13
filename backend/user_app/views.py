@@ -1,17 +1,19 @@
-from django.shortcuts import render
 from .models import User, UserSwipe
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as s
 from django.contrib.auth import authenticate, login, logout
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError
 from favorite_app.models import Favorite
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from .authentication import CookieTokenAuthentication
+from django.conf import settings
    
-class UserPermission(APIView):  
-    authentication_classes = [TokenAuthentication]
+class UserPermission(APIView):
+    authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
 class Info(UserPermission):
@@ -48,6 +50,12 @@ class SignUp(APIView):
                 {"detail": "Email and password required"},
                 status=s.HTTP_400_BAD_REQUEST,
             )
+        
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            return Response({"errors": e.messages}, status=s.HTTP_400_BAD_REQUEST)
+
         try:
             user = User.objects.create_user(
                 username=email,
@@ -57,6 +65,7 @@ class SignUp(APIView):
                 last_name=last_name,
                 is_staff=False,
                 is_superuser=False,
+                is_active=True,
             )
         except IntegrityError:
             return Response(
@@ -66,8 +75,7 @@ class SignUp(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=s.HTTP_400_BAD_REQUEST)
 
-        token_obj, _ = Token.objects.get_or_create(user=user)
-        return Response({"token": token_obj.key}, status=s.HTTP_201_CREATED)
+        return Response({"detail": "User created"}, status=s.HTTP_201_CREATED)
         
 class LogIn(APIView):
     
@@ -86,10 +94,23 @@ class LogIn(APIView):
         if user:
             token_obj, _ = Token.objects.get_or_create(user=user)
             login(request=request, user=user)
-            return Response({'token': token_obj.key}, status=s.HTTP_200_OK)
+            response = Response(
+                {'detail': 'Logged in', 'token': token_obj.key},
+                status=s.HTTP_200_OK,
+            )
+            secure_cookie = not settings.DEBUG
+            samesite = 'None' if secure_cookie else 'Lax'
+            response.set_cookie(
+                'auth_token',
+                token_obj.key,
+                httponly=True,
+                secure=secure_cookie,
+                samesite=samesite,
+            )
+            return response
         else:
             return Response(
-                {'detail': 'Invalid credentials'},
+                {'detail': 'Invalid credentials or inactive account'},
                 status=s.HTTP_401_UNAUTHORIZED,
             )
 
@@ -100,7 +121,9 @@ class LogOut(UserPermission):
         token = user.auth_token
         logout(request)
         token.delete()
-        return Response({"success": True})
+        response = Response({"success": True})
+        response.delete_cookie('auth_token')
+        return response
     
 
 class Location(UserPermission):
@@ -157,3 +180,25 @@ class UserMatchResetView(UserPermission):
         request.user.swipes.all().delete()
         Favorite.objects.filter(user_favorites=request.user).delete()
         return Response({'status': 'reset'})
+
+
+class PasswordResetView(UserPermission):
+    def post(self, request):
+        old_password = request.data.get("old_password")
+        new_password = request.data.get("new_password")
+
+        if not old_password or not new_password:
+            return Response(
+                {"detail": "old_password and new_password required"},
+                status=s.HTTP_400_BAD_REQUEST,
+            )
+
+        if not request.user.check_password(old_password):
+            return Response(
+                {"detail": "Invalid password"},
+                status=s.HTTP_400_BAD_REQUEST,
+            )
+
+        request.user.set_password(new_password)
+        request.user.save()
+        return Response({"success": True})

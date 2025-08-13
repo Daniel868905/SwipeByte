@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import RestaurantSwiper from '../components/RestaurantSwiper'
+import { API_BASE_URL } from '../config'
 
 function Home({ isLoggedIn, token }) {
   const [restaurants, setRestaurants] = useState([])
@@ -13,7 +14,7 @@ function Home({ isLoggedIn, token }) {
     if (!token) return
     const fetchLocation = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/v1/users/', {
+        const res = await fetch(`${API_BASE_URL}/api/v1/users/`, {
           headers: { Authorization: `Token ${token}` },
         })
         if (res.ok) {
@@ -26,7 +27,7 @@ function Home({ isLoggedIn, token }) {
     }
     const fetchGroups = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/v1/groups/', {
+        const res = await fetch(`${API_BASE_URL}/api/v1/groups/`, {
           headers: { Authorization: `Token ${token}` },
         })
         if (res.ok) {
@@ -45,7 +46,7 @@ function Home({ isLoggedIn, token }) {
     if (!token) return
     const fetchFavorites = async () => {
       try {
-        const url = new URL('http://localhost:8000/api/v1/favorites/')
+        const url = new URL(`${API_BASE_URL}/api/v1/favorites/`)
         if (target !== 'self') {
           url.searchParams.append('group', target)
         }
@@ -68,13 +69,17 @@ function Home({ isLoggedIn, token }) {
   }, [target])
 
 
-  const sortRestaurants = (list) => {
-    return [...list].sort((a, b) => {
-      const aFav = favorites.some((f) => f.restaurant === a.name)
-      const bFav = favorites.some((f) => f.restaurant === b.name)
-      return bFav - aFav
-    })
-  }
+  const sortRestaurants = useCallback(
+    (list) => {
+      return [...list].sort((a, b) => {
+        const aFav = favorites.some((f) => f.restaurant === a.name)
+        const bFav = favorites.some((f) => f.restaurant === b.name)
+        return bFav - aFav
+      })
+    },
+    [favorites],
+  )
+
 
 
   const handleSearch = async (e) => {
@@ -88,7 +93,7 @@ function Home({ isLoggedIn, token }) {
     }
     const params = new URLSearchParams(paramsObj)
     const res = await fetch(
-      `http://localhost:8000/api/v1/restaurants/?${params.toString()}`,
+      `${API_BASE_URL}/api/v1/restaurants/?${params.toString()}`,
       {
         headers: { Authorization: `Token ${token}` },
       },
@@ -99,12 +104,12 @@ function Home({ isLoggedIn, token }) {
 
   useEffect(() => {
     setRestaurants((prev) => sortRestaurants(prev))
-  }, [favorites])
+  }, [favorites, sortRestaurants])
 
   const handleFavoriteToggle = async (restaurant) => {
     const existing = favorites.find((f) => f.restaurant === restaurant.name)
     if (existing) {
-      await fetch(`http://localhost:8000/api/v1/favorites/${existing.id}/`, {
+      await fetch(`${API_BASE_URL}/api/v1/favorites/${existing.id}/`, {
         method: 'DELETE',
         headers: { Authorization: `Token ${token}` },
       })
@@ -114,7 +119,7 @@ function Home({ isLoggedIn, token }) {
       if (target !== 'self') {
         body.group_favorites_id = target
       }
-      const res = await fetch('http://localhost:8000/api/v1/favorites/', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/favorites/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +137,7 @@ function Home({ isLoggedIn, token }) {
   const handleLike = async (restaurant) => {
     try {
       if (target === 'self') {
-        const res = await fetch(`http://localhost:8000/api/v1/users/swipe/`, {
+        const res = await fetch(`${API_BASE_URL}/api/v1/users/swipe/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -148,7 +153,7 @@ function Home({ isLoggedIn, token }) {
         }
       } else {
         const res = await fetch(
-          `http://localhost:8000/api/v1/groups/${target}/swipe/`,
+          `${API_BASE_URL}/api/v1/groups/${target}/swipe/`,
           {
             method: 'POST',
             headers: {
@@ -174,7 +179,7 @@ function Home({ isLoggedIn, token }) {
   const handleDislike = async (restaurant) => {
     try {
       if (target === 'self') {
-        await fetch(`http://localhost:8000/api/v1/users/swipe/`, {
+        await fetch(`${API_BASE_URL}/api/v1/users/swipe/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -183,7 +188,7 @@ function Home({ isLoggedIn, token }) {
           body: JSON.stringify({ restaurant: restaurant.name, liked: false }),
         })
       } else {
-        await fetch(`http://localhost:8000/api/v1/groups/${target}/swipe/`, {
+        await fetch(`${API_BASE_URL}/api/v1/groups/${target}/swipe/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -200,12 +205,12 @@ function Home({ isLoggedIn, token }) {
   const handleReset = async () => {
     try {
       if (target === 'self') {
-        await fetch(`http://localhost:8000/api/v1/users/reset/`, {
+        await fetch(`${API_BASE_URL}/api/v1/users/reset/`, {
           method: 'POST',
           headers: { Authorization: `Token ${token}` },
         })
       } else {
-        await fetch(`http://localhost:8000/api/v1/groups/${target}/reset/`, {
+        await fetch(`${API_BASE_URL}/api/v1/groups/${target}/reset/`, {
           method: 'POST',
           headers: { Authorization: `Token ${token}` },
         })
