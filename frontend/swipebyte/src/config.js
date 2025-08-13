@@ -1,2 +1,2 @@
 export const API_BASE_URL =
-  'https://u5dnmrdvhspwktiq6f2h76bh7q0vfxrt.lambda-url.us-east-2.on.aws/swipebyte' || 'http://localhost:8000';
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
