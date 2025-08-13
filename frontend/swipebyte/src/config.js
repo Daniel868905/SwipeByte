@@ -1,2 +1,2 @@
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+  'https://u5dnmrdvhspwktiq6f2h76bh7q0vfxrt.lambda-url.us-east-2.on.aws/' || 'http://localhost:8000';
