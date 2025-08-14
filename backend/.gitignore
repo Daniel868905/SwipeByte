@@ -3,3 +3,7 @@ __pycache__
 .venv
 dev-cert.ckt
 dev-cert.key
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
