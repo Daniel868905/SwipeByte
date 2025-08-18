@@ -2,6 +2,18 @@ import os
 import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import HttpResponse
+
+def _empty_or_error(detail, code=400):
+    """Return [] with HTTP 200 so the UI never crashes, but include reason in headers."""
+    import os
+    if os.environ.get("RESTAURANT_SEARCH_EMPTY_ON_ERROR", "1") == "1":
+        resp = Response([], status=200)
+        resp["X-Error-Detail"] = detail
+        resp["X-Error-Code"] = str(code)
+        return resp
+    return Response({"detail": detail}, status=code)
+
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Restaurant
@@ -101,3 +113,120 @@ class RestaurantSearchView(APIView):
                 }
             )
         return Response(restaurants)
+
+# --- BEGIN: drop-in Google Places search shim ---
+import os, requests
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.http import HttpResponse
+
+def _get_google_places_key():
+    return os.environ.get("GOOGLE_PLACES_API_KEY") or os.environ.get("GOOGLE_MAPS_API_KEY")
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def restaurant_search(request):
+    key = _get_google_places_key()
+
+    # Accept q or search; allow empty -> generic 'nearby restaurants'
+    q = (request.GET.get("q") or request.GET.get("search") or "").strip() or None
+
+    # Accept lat/lng OR lat/lon; fall back to user profile
+    lat = request.GET.get("lat") or getattr(request.user, "latitude", None)
+    lng = (request.GET.get("lng") or request.GET.get("lon") or getattr(request.user, "longitude", None))
+
+    if not key:
+        return _empty_or_error("Server is missing Google Places key", 503)
+    if not lat or not lng:
+        return _empty_or_error("lat/lng required or set your location first", 400)
+
+    # distance (miles) -> radius (meters), clamp 100..50000
+    radius = request.GET.get("radius")
+    if not radius:
+        dist = request.GET.get("distance")
+        if dist:
+            try:
+                radius = int(float(dist) * 1609.34)
+            except Exception:
+                radius = 2500
+        else:
+            radius = 2500
+    radius = max(100, min(int(radius), 50000))
+
+    params = {
+        "location": f"{lat},{lng}",
+        "radius": str(radius),
+        "type": "restaurant",
+        "key": key,
+    }
+    if q:
+        params["keyword"] = q
+
+    # price (0–4) -> minprice/maxprice
+    price = request.GET.get("price")
+    if price is not None:
+        try:
+            pr = int(price)
+            if 0 <= pr <= 4:
+                params["minprice"] = pr
+                params["maxprice"] = pr
+        except Exception:
+            pass
+
+    try:
+        r = requests.get(
+            "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+            params=params, timeout=10
+        )
+        r.raise_for_status()
+        data = r.json()
+        results = []
+        for it in data.get("results", []):
+            photos = (it.get("photos") or [])
+            photo_ref = (photos[0] or {}).get("photo_reference") if photos else None
+    
+            loc = (it.get("geometry") or {}).get("location") or {}
+            results.append({
+                "id": it.get("place_id"),
+                
+                "name": it.get("name"),
+                "rating": it.get("rating"),
+                "user_ratings_total": it.get("user_ratings_total"),
+                "vicinity": it.get("vicinity") or it.get("formatted_address"),
+                "location": {"lat": loc.get("lat"), "lng": loc.get("lng")},
+                "photo_ref": photo_ref,
+                "photo_url": (f"/api/v1/restaurants/photo?ref={photo_ref}" if photo_ref else None),
+                "image": (f"/api/v1/restaurants/photo?ref={photo_ref}" if photo_ref else None),
+                "open_now": (it.get("opening_hours") or {}).get("open_now"),
+                "price_level": it.get("price_level"),
+            })
+        return Response(results)
+    except requests.HTTPError as e:
+        try:
+            payload = e.response.json()
+        except Exception:
+            payload = {"detail": str(e)}
+        return _empty_or_error(str(payload), e.response.status_code)
+
+
+@api_view(["GET"])
+@permission_classes([])  # AllowAny so <img> can load without auth header
+def restaurant_photo(request):
+    key = _get_google_places_key()
+    ref = (request.GET.get("ref") or "").strip()
+    maxwidth = str(request.GET.get("maxwidth", "400"))
+    if not key or not ref:
+        return Response({"detail":"photo ref required"}, status=400)
+    try:
+        r = requests.get(
+            "https://maps.googleapis.com/maps/api/place/photo",
+            params={"maxwidth": maxwidth, "photo_reference": ref, "key": key},
+            timeout=10, allow_redirects=True
+        )
+        r.raise_for_status()
+    except Exception as e:
+        return Response({"detail": str(e)}, status=502)
+    resp = HttpResponse(r.content, content_type=r.headers.get("Content-Type","image/jpeg"))
+    resp["Cache-Control"] = "public, max-age=86400"
+    return resp

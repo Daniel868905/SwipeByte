@@ -19,6 +19,7 @@ from django.urls import path, include
 from .views import ping, home
 
 urlpatterns = [
+    path('api/v1/users/', include('geosvc.urls')),
     path('', home),
     path('admin/', admin.site.urls),
     path('api/v1/ping/', ping),

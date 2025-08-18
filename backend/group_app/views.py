@@ -2,7 +2,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
+from user_app.authentication import CookieTokenAuthentication
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 
@@ -13,7 +13,7 @@ from favorite_app.models import Favorite
 
 
 class GroupWithFavoritesView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -44,7 +44,7 @@ class GroupWithFavoritesView(APIView):
 
 
 class GroupSwipeView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, group_id):
@@ -87,7 +87,7 @@ class GroupSwipeView(APIView):
 
 
 class GroupMatchResetView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, group_id):
@@ -103,7 +103,7 @@ class GroupMatchResetView(APIView):
         return Response({'status': 'reset'})
     
 class GroupMembersView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, group_id):

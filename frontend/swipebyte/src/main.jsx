@@ -1,3 +1,7 @@
+import "./shims/fetch";
+import { installLogoutIntercept } from "./logout-intercept";
+installLogoutIntercept("/api/v1/users");
+import "./urlfix.js";
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
