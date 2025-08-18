@@ -2,11 +2,13 @@ import { apiUrl } from '../config';
 
 function getToken() {
   try {
-    const ls = localStorage.getItem('auth_token');
-    if (ls) return ls;
-  } catch (_) {}
-  const m = (document.cookie || '').match(/(?:^|;\s*)auth_token=([^;]+)/);
-  return m ? decodeURIComponent(m[1]) : null;
+    const ls = localStorage.getItem('auth_token')
+    if (ls) return ls
+  } catch {
+    // Ignore if localStorage is unavailable
+  }
+  const m = (document.cookie || '').match(/(?:^|;\s*)auth_token=([^;]+)/)
+  return m ? decodeURIComponent(m[1]) : null
 }
 
 const origFetch = window.fetch.bind(window);

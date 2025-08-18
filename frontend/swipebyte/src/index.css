@@ -110,3 +110,18 @@ body[data-bs-theme='dark'] {
   max-height: 80vh;
   overflow-y: auto;
 }
+
+
+/* Signup form responsiveness */
+.password-requirements {
+  list-style-type: none;
+  padding-left: 0;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 576px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
