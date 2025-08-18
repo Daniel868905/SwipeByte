@@ -77,6 +77,10 @@ function Signup({ onAuth, backendUrl }) {
             </div>
             <div className="mb-3">
               <label className="form-label">Password</label>
+              <small className="text-muted ms-2">
+                Must be at least 8 characters with an uppercase letter, lowercase letter,
+                number, and special character
+              </small>
               <input
                 type="password"
                 className="form-control"
