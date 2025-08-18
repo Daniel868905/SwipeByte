@@ -18,14 +18,26 @@ function NavBar({ isLoggedIn, onNavigate, onLogout, darkMode, onToggleTheme }) {
           SwipeByte
         </a>
         <button
-          className="navbar-toggler"
+          className={`navbar-toggler${collapsed ? ' collapsed' : ''}`}
           type="button"
           aria-controls="navbarNav"
           aria-expanded={!collapsed}
           aria-label="Toggle navigation"
           onClick={() => setCollapsed(!collapsed)}
         >
-          <span className="navbar-toggler-icon"></span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="30"
+            height="30"
+            viewBox="0 0 30 30"
+          >
+            <path
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              d="M4 7h22M4 15h22M4 23h22"
+            />
+          </svg>
         </button>
         <div
           className={`collapse navbar-collapse${collapsed ? '' : ' show'}`}
