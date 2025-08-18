@@ -9,12 +9,18 @@ function Signup({ onAuth, backendUrl }) {
   })
   const [error, setError] = useState(null)
   const [passwordCheck, setPasswordCheck] = useState({
-  length: false,
-  upper: false,
-  lower: false,
-  number: false,
-  special: false,
+    length: false,
+    upper: false,
+    lower: false,
+    number: false,
+    special: false,
   })
+
+    const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm({ ...form, [name]: value })
+  }
+
 
   const handlePasswordChange = (e) => {
     const password = e.target.value
@@ -122,9 +128,9 @@ function Signup({ onAuth, backendUrl }) {
             </button>
           </form>
         </div>
-         </div>
+      </div>
     </div>
   )
-  }
+}
 
 export default Signup
