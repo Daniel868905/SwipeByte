@@ -56,4 +56,12 @@ class RestaurantSearchViewTests(TestCase):
         names = {r["name"] for r in data}
         self.assertIn("Test Restaurant", names)
         self.assertIn("Test Fast Food", names)
-        self.assertEqual(mock_get.call_count, 2)
+        urls = {r["id"]: r["url"] for r in data}
+        self.assertEqual(
+            urls["1"],
+            "https://www.google.com/maps/place/?q=place_id:1",
+        )
+        self.assertEqual(
+            urls["2"],
+            "https://www.google.com/maps/place/?q=place_id:2",
+        )

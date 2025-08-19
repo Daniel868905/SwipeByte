@@ -200,6 +200,7 @@ def restaurant_search(request):
                 "image": (f"/api/v1/restaurants/photo?ref={photo_ref}" if photo_ref else None),
                 "open_now": (it.get("opening_hours") or {}).get("open_now"),
                 "price_level": it.get("price_level"),
+                "url": f"https://www.google.com/maps/place/?q=place_id:{it.get('place_id')}",
             })
         return Response(results)
     except requests.HTTPError as e:

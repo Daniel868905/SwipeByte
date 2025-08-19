@@ -29,6 +29,8 @@ function RestaurantSwiper({
 
   const current = list[index]
   const isFavorite = favorites.some((f) => f.restaurant === current.name)
+  const imageSrc = current.image_url || current.image
+
 
   const handleLike = () => {
     setDirection('right')
@@ -89,9 +91,9 @@ function RestaurantSwiper({
       onAnimationEnd={handleAnimationEnd}
     >
 
-      {current.image_url && (
+      {imageSrc && (
         <img
-          src={current.image_url}
+          src={imageSrc}
           className="card-img-top"
           alt={current.name}
           style={{ height: '200px', objectFit: 'cover' }}
