@@ -8,6 +8,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --text-bg-color: #fff;
 }
 
 
@@ -22,6 +23,22 @@ body[data-bs-theme='dark'] {
   background: url('/dark_food_background.jpg') no-repeat center center fixed;
   background-size: cover;
   color: #f8f9fa;
+    --text-bg-color: #000;
+}
+
+/* Ensure text remains readable against background images */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+a,
+li,
+label {
+  background-color: var(--text-bg-color);
 }
 
 .swipe-card {
