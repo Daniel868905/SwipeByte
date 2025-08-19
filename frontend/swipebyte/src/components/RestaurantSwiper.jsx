@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { apiUrl } from '../config'
 
 function RestaurantSwiper({
   restaurants,
@@ -29,7 +30,8 @@ function RestaurantSwiper({
 
   const current = list[index]
   const isFavorite = favorites.some((f) => f.restaurant === current.name)
-  const imageSrc = current.image_url || current.image
+  const rawImage = current.image_url || current.image
+  const imageSrc = rawImage && (rawImage.startsWith('http') ? rawImage : apiUrl(rawImage))
 
 
   const handleLike = () => {
@@ -102,8 +104,15 @@ function RestaurantSwiper({
       <div className="card-body text-center">
         <h5 className="card-title">{current.name}</h5>
         <p className="card-text">
-          {current.price || 'N/A'} | Rating: {current.rating || 'N/A'}
+          Rating: {current.rating || 'N/A'}
         </p>
+        {current.url && (
+          <p>
+            <a href={current.url} target="_blank" rel="noreferrer">
+              More information
+            </a>
+          </p>
+        )}
         <div className="d-flex justify-content-around">
           <button className="btn btn-dislike" onClick={handleDislike}>
             Dislike

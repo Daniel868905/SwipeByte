@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import RestaurantSwiper from '../components/RestaurantSwiper'
-import { API_BASE_URL } from '../config'
+import { API_BASE_URL, apiUrl } from '../config'
 
 function Home({ isLoggedIn, token }) {
   const [restaurants, setRestaurants] = useState([])
@@ -279,17 +279,17 @@ function Home({ isLoggedIn, token }) {
               <p>
                 {match.price || 'N/A'} | Rating: {match.rating || 'N/A'}
               </p>
-              {match.url && (
-                <p>
-                  <a
-                    href={match.url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    More details
-                  </a>
-                </p>
-              )}
+                {match.url && (
+                  <p>
+                    <a
+                      href={match.url.startsWith('http') ? match.url : apiUrl(match.url)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      More information
+                    </a>
+                  </p>
+                )}
               <button className="btn btn-secondary" onClick={handleReset}>
                 Reset
               </button>
