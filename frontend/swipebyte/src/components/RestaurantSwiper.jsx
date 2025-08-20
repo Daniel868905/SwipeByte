@@ -30,8 +30,11 @@ function RestaurantSwiper({
 
   const current = list[index]
   const isFavorite = favorites.some((f) => f.restaurant === current.name)
-  const rawImage = current.image_url || current.image
-  const imageSrc = rawImage && (rawImage.startsWith('http') ? rawImage : apiUrl(rawImage))
+  const imageSrc =
+    current.image_url &&
+    (current.image_url.startsWith('http')
+      ? current.image_url
+      : apiUrl(current.image_url))
 
 
   const handleLike = () => {
@@ -108,7 +111,13 @@ function RestaurantSwiper({
         </p>
         {current.url && (
           <p>
-            <a href={current.url} target="_blank" rel="noreferrer">
+            <a
+              href={
+                current.url.startsWith('http') ? current.url : apiUrl(current.url)
+              }
+              target="_blank"
+              rel="noreferrer"
+            >
               More information
             </a>
           </p>
