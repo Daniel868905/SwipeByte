@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { apiUrl } from '../config'
 
 function RestaurantSwiper({
   restaurants,
@@ -30,12 +29,6 @@ function RestaurantSwiper({
 
   const current = list[index]
   const isFavorite = favorites.some((f) => f.restaurant === current.name)
-  const imageSrc =
-    current.image_url &&
-    (current.image_url.startsWith('http')
-      ? current.image_url
-      : apiUrl(current.image_url))
-
 
   const handleLike = () => {
     setDirection('right')
@@ -96,9 +89,9 @@ function RestaurantSwiper({
       onAnimationEnd={handleAnimationEnd}
     >
 
-      {imageSrc && (
+      {current.image_url && (
         <img
-          src={imageSrc}
+          src={current.image_url}
           className="card-img-top"
           alt={current.name}
           style={{ height: '200px', objectFit: 'cover' }}
@@ -107,21 +100,8 @@ function RestaurantSwiper({
       <div className="card-body text-center">
         <h5 className="card-title">{current.name}</h5>
         <p className="card-text">
-          Rating: {current.rating || 'N/A'}
+        Rating: {current.rating || 'N/A'}
         </p>
-        {current.url && (
-          <p>
-            <a
-              href={
-                current.url.startsWith('http') ? current.url : apiUrl(current.url)
-              }
-              target="_blank"
-              rel="noreferrer"
-            >
-              More information
-            </a>
-          </p>
-        )}
         <div className="d-flex justify-content-around">
           <button className="btn btn-dislike" onClick={handleDislike}>
             Dislike
