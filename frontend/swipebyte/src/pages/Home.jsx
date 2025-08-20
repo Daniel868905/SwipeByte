@@ -277,7 +277,7 @@ function Home({ isLoggedIn, token }) {
             <div className="text-center">
               <h3>Match found for {match.name}!</h3>
               <p>
-                {match.price || 'N/A'} | Rating: {match.rating || 'N/A'}
+              Rating: {match.rating || 'N/A'}
               </p>
                 {match.url && (
                   <p>
